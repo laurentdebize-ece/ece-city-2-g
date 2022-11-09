@@ -29,7 +29,7 @@
 #define XCHRONO 1100
 #define YCHRONO 45
 #define X1GRILLE 20
-#define X2GRILLE 628
+#define X2GRILLE 807
 #define Y1GRILLE 20
 #define Y2GRILLE 628
 #define MONTER  1
@@ -66,8 +66,8 @@ typedef struct Joueur{
 void initAllegro(){
     al_init();
     al_init_primitives_addon();
-    //al_init_font_addon();
-    //al_init_ttf_addon();
+    al_init_font_addon();
+    al_init_ttf_addon();
     //al_init_image_addon();
     //al_install_keyboard();
     al_install_mouse();
@@ -135,7 +135,7 @@ void initDonneesJeu(){
     //initialiserObstacle();
 }
 
-/*
+
 void dessinerBouton(int x1,int y1,int x2,int y2,ALLEGRO_COLOR couleur, char* texte, ALLEGRO_FONT* policeTexte,short taillePolice ){
     al_draw_filled_rectangle(x1, y1, x2, y2,couleur);
     al_draw_rectangle(x1,y1,x2,y2, al_map_rgb(50,50,50), 2);
@@ -156,7 +156,7 @@ void dessinnerBouton(int x1,int y1,int x2,int y2,ALLEGRO_COLOR couleur, char* te
 
 ALLEGRO_FONT* initialiserPoliceTexte2(short taillePolice){
     ALLEGRO_FONT* policeTexte = NULL ;
-    policeTexte = al_load_ttf_font("", taillePolice,0);
+    policeTexte = al_load_ttf_font("../Bangers-Regular.ttf", taillePolice,0);
     return policeTexte;
 }
 
@@ -185,11 +185,11 @@ void afficherChrono(double angle, ALLEGRO_COLOR couleur){
     al_draw_line(XCHRONO -3, YCHRONO - 35, XCHRONO +3, YCHRONO - 35, couleur, 4);
     al_draw_filled_triangle(XCHRONO-cos(angle)*2, YCHRONO +sin(angle)*2, XCHRONO +cos(angle)*2, YCHRONO - sin(angle)*2, XCHRONO - sin(angle)*25, YCHRONO - cos(angle)*25, couleur);
 }
- */
 
 
 
-/*
+
+
 void afficherTempsRestant(float tempsRestant, ALLEGRO_FONT* policeTexte){
     al_draw_textf(policeTexte, al_map_rgb(0,0,0), XCHRONO + 60, YCHRONO - 20,0,"%.1f secondes", tempsRestant);
     double angle = (15-tempsRestant)*0.42;
@@ -198,7 +198,7 @@ void afficherTempsRestant(float tempsRestant, ALLEGRO_FONT* policeTexte){
     }
     else{afficherChrono(angle, al_map_rgb(0,0,0));}
 }
-*/
+
 
 void dessinnerTouteCasesColorie() {
     for (short i = 0; i < NOMBRELIGNE; i++) {
@@ -208,14 +208,13 @@ void dessinnerTouteCasesColorie() {
         }
     }
 
-    /*
 ALLEGRO_FONT* initialiserPoliceTexte(short taillePolice){
     ALLEGRO_FONT* policeTexte = NULL ;
-    policeTexte = al_load_ttf_font("", taillePolice,0);
+    policeTexte = al_load_ttf_font("../Bangers-Regular.ttf", taillePolice,0);
     return policeTexte;
 }
 
-    */
+
 
 bool checkSourisDansBouton(short xSouris, short ySouris, short x1, short y1,short x2, short y2 ){
     if(xSouris >= x1 && xSouris <= x2 && ySouris >= y1 && ySouris <= y2){
@@ -229,11 +228,13 @@ void dessinneGrille( int x1, int y1, int x2, int y2, int epaisseur, ALLEGRO_COLO
     float hauteurCase = hauteurCaseGrille(y1, y2);
     for(int i = 0; i <= NOMBRECOLONNE; i++){
         al_draw_line( x1 + i*largeurCase, y1,x1 +i* largeurCase , y2, couleurGrille, epaisseur);
-        if(i<16){al_draw_textf(policeTexte,couleurGrille, x1 + i*largeurCase +3, y1 - 15,0,"%d", i+1);}
+        if(i<NOMBRECOLONNE){
+            al_draw_textf(policeTexte,couleurGrille, x1 + i*largeurCase +3, y1 - 15,0,"%d", i+1);}
     }
     for(int j = 0; j <= NOMBRELIGNE; j++){
         al_draw_line(x1, y1+ j*hauteurCase, x2, y1 + j*hauteurCase, couleurGrille, epaisseur);
-        if(j<16){al_draw_textf(policeTexte, couleurGrille,x1 -16, y1 + j*hauteurCase +2,0,"%d", j+1 );}
+        if(j<NOMBRELIGNE){
+            al_draw_textf(policeTexte, couleurGrille,x1 -16, y1 + j*hauteurCase +2,0,"%d", j+1 );}
     }
 }
 
@@ -277,7 +278,10 @@ int main() {
     al_clear_to_color(al_map_rgb(255, 255, 255));
     ALLEGRO_MOUSE_STATE sourisState;
     //ALLEGRO_KEYBOARD_STATE clavierState;
-    //short taillePolice = 15;
+    short taillePolice = 12;
+    ALLEGRO_FONT  * policeTexte = initialiserPoliceTexte(taillePolice);
+    ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
+    ALLEGRO_FONT  * policeTexte2 = initialiserPoliceTexte2(TAILLEPOLICEBOUTTONNORMALE);
     initDonneesJeu();
     bool fin = false;
     al_flip_display();
@@ -286,13 +290,22 @@ int main() {
         //ALLEGRO_KEYBOARD_STATE clavierState;
         //al_get_keyboard_state(&clavierState);
         al_get_mouse_state(&sourisState);
+
         switch (event.type) {
             case ALLEGRO_EVENT_DISPLAY_CLOSE : {
                 fin = true;
                 break;
             }
+            case ALLEGRO_EVENT_TIMER : {
+                al_clear_to_color(al_map_rgb(255, 255, 255));
+                dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
+                al_get_mouse_state(&sourisState);
+                if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
+                    al_flip_display();
+                }
+            }
+            al_flip_display();
         }
-        al_flip_display();
     }
     while (!fin);
     al_destroy_display(display);
