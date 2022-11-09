@@ -192,7 +192,7 @@ void afficherChrono(double angle, ALLEGRO_COLOR couleur){
 
 void afficherTempsRestant(float tempsRestant, ALLEGRO_FONT* policeTexte){
     al_draw_textf(policeTexte, al_map_rgb(0,0,0), XCHRONO + 60, YCHRONO - 20,0,"%.1f secondes", tempsRestant);
-    double angle = (15-tempsRestant)*0.42;
+    double angle = (tempsRestant)*(-0.42);
     if(tempsRestant <= 3){
         afficherChrono(angle, al_map_rgb(190,0,0));
     }
@@ -227,14 +227,14 @@ void dessinneGrille( int x1, int y1, int x2, int y2, int epaisseur, ALLEGRO_COLO
     float largeurCase = largeurCaseGrille(x1, x2);
     float hauteurCase = hauteurCaseGrille(y1, y2);
     for(int i = 0; i <= NOMBRECOLONNE; i++){
-        al_draw_line( x1 + i*largeurCase, y1,x1 +i* largeurCase , y2, couleurGrille, epaisseur);
+        al_draw_line( x1 + i*largeurCase, y1,x1 +i* largeurCase , y2-13, couleurGrille, epaisseur);
         if(i<NOMBRECOLONNE){
-            al_draw_textf(policeTexte,couleurGrille, x1 + i*largeurCase +3, y1 - 15,0,"%d", i+1);}
+            al_draw_textf(policeTexte,couleurGrille, x1 + i*largeurCase +3, y1 - 13,0,"%d", i+1);}
     }
     for(int j = 0; j <= NOMBRELIGNE; j++){
-        al_draw_line(x1, y1+ j*hauteurCase, x2, y1 + j*hauteurCase, couleurGrille, epaisseur);
+        al_draw_line(x1, y1+ j*hauteurCase, x2-22, y1 + j*hauteurCase, couleurGrille, epaisseur);
         if(j<NOMBRELIGNE){
-            al_draw_textf(policeTexte, couleurGrille,x1 -16, y1 + j*hauteurCase +2,0,"%d", j+1 );}
+            al_draw_textf(policeTexte, couleurGrille,x1 -22, y1 + j*hauteurCase +2,0,"  %d", j+1 );}
     }
 }
 
@@ -243,14 +243,17 @@ void dessinneGrille( int x1, int y1, int x2, int y2, int epaisseur, ALLEGRO_COLO
 
 void colorierCaseGrille(short xSouris, short ySouris, ALLEGRO_FONT* policeTexte){
     for(short i = 0; i< NOMBRECOLONNE; i++){
-        for(short j = 0; j<NOMBRELIGNE; j++){
-            if(checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i+1),
-                                     coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE,j+1 ), coordonneX2CaseGrille(X1GRILLE,X2GRILLE, i+1),
-                                     coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j+1) )) {
+        for(short j = 0; j<NOMBRELIGNE; j++) {
+            if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),
+                                      coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),
+                                      coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),
+                                      coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
                 matriceCase[j][i].couleurCase = al_map_rgba(80, 80, 80, 0.4);
             }
+            /*
             else if(matriceCase[j][i].obstacle != -1){matriceCase[j][i].couleurCase = al_map_rgba(0,0,0, 0);}
             else if(matriceCase[j][i].obstacle == -1 ){matriceCase[j][i].couleurCase  = al_map_rgba(0,0,130,100);}
+             */
         }
     }
 }
@@ -279,10 +282,12 @@ int main() {
     ALLEGRO_MOUSE_STATE sourisState;
     //ALLEGRO_KEYBOARD_STATE clavierState;
     short taillePolice = 12;
+    float tempsRestant = 0.0;
     ALLEGRO_FONT  * policeTexte = initialiserPoliceTexte(taillePolice);
     ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
     ALLEGRO_FONT  * policeTexte2 = initialiserPoliceTexte2(TAILLEPOLICEBOUTTONNORMALE);
     initDonneesJeu();
+    initialiserCasesGrille();
     bool fin = false;
     al_flip_display();
     do {
@@ -297,12 +302,16 @@ int main() {
                 break;
             }
             case ALLEGRO_EVENT_TIMER : {
+                tempsRestant += 0.1;
                 al_clear_to_color(al_map_rgb(255, 255, 255));
                 dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
                 al_get_mouse_state(&sourisState);
+                colorierCaseGrille(sourisState.x, sourisState.y, policeTexte);
+                afficherTempsRestant(tempsRestant, policeTexte);
                 if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
                     al_flip_display();
                 }
+                al_flip_display();
             }
             al_flip_display();
         }
