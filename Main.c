@@ -62,6 +62,36 @@ typedef struct Joueur{
     int numJoueur,  ligne, colonne;
 } Joueur;
 
+Bouton tabBoutonPause[3];
+
+void initialiserTabBoutonPause(){
+    tabBoutonPause[0].x1Bouton = 440;
+    tabBoutonPause[1].x1Bouton = 440;
+    tabBoutonPause[2].x1Bouton = 440;
+    tabBoutonPause[0].x2Bouton = 760;
+    tabBoutonPause[1].x2Bouton = 760;
+    tabBoutonPause[2].x2Bouton = 760;
+    tabBoutonPause[0].y1Bouton = 305;
+    tabBoutonPause[1].y1Bouton = 405;
+    tabBoutonPause[2].y1Bouton = 505;
+    tabBoutonPause[0].y2Bouton = 395;
+    tabBoutonPause[1].y2Bouton = 495;
+    tabBoutonPause[2].y2Bouton = 595;
+    strcpy(tabBoutonPause[0].nomBouton, "REPRENDRE PARTIE");
+    strcpy(tabBoutonPause[1].nomBouton, "SAUVEGARDER");
+    strcpy(tabBoutonPause[2].nomBouton, "CONTACTER SAV");
+    tabBoutonPause[0].couleurBouton = al_map_rgb(180,180,180);
+    tabBoutonPause[0].couleurTexte = al_map_rgb(10,0,0);
+    tabBoutonPause[0].couleurPassageBouton = al_map_rgb(200,0,250);
+    tabBoutonPause[1].couleurBouton = al_map_rgb(180,180,180);
+    tabBoutonPause[1].couleurTexte = al_map_rgb(10,0,0);
+    tabBoutonPause[1].couleurPassageBouton = al_map_rgb(200,0,250);
+    tabBoutonPause[2].couleurBouton = al_map_rgb(180,180,180);
+    tabBoutonPause[2].couleurTexte = al_map_rgb(10,0,0);
+    tabBoutonPause[2].couleurPassageBouton = al_map_rgb(200,0,250);
+    tabBoutonPause[0].taillePolice =15;
+}
+
 
 void initAllegro(){
     al_init();
@@ -241,7 +271,7 @@ void dessinneGrille( int x1, int y1, int x2, int y2, int epaisseur, ALLEGRO_COLO
 
 
 
-void colorierCaseGrille(short xSouris, short ySouris, ALLEGRO_FONT* policeTexte){
+void colorierCaseGrille(short xSouris, short ySouris){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),
@@ -258,10 +288,15 @@ void colorierCaseGrille(short xSouris, short ySouris, ALLEGRO_FONT* policeTexte)
     }
 }
 
+void dessinerBoutonOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
+    dessinerBouton(X2GRILLE +20, Y1GRILLE , X2GRILLE +170, Y1GRILLE +50, al_map_rgb(150,150,150), "outils", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+}
+
 
 
 int main() {
     initAllegro();
+    initialiserTabBoutonPause();
     ALLEGRO_EVENT_QUEUE *queue = NULL;
     ALLEGRO_EVENT_QUEUE *temps = NULL;
     ALLEGRO_EVENT event;
@@ -284,8 +319,8 @@ int main() {
     short taillePolice = 12;
     float tempsRestant = 0.0;
     ALLEGRO_FONT  * policeTexte = initialiserPoliceTexte(taillePolice);
-    ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
-    ALLEGRO_FONT  * policeTexte2 = initialiserPoliceTexte2(TAILLEPOLICEBOUTTONNORMALE);
+    //ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
+    //ALLEGRO_FONT  * policeTexte2 = initialiserPoliceTexte2(TAILLEPOLICEBOUTTONNORMALE);
     initDonneesJeu();
     initialiserCasesGrille();
     bool fin = false;
@@ -306,12 +341,13 @@ int main() {
                 al_clear_to_color(al_map_rgb(255, 255, 255));
                 dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
                 al_get_mouse_state(&sourisState);
-                colorierCaseGrille(sourisState.x, sourisState.y, policeTexte);
+                colorierCaseGrille(sourisState.x, sourisState.y);
+                dessinnerTouteCasesColorie();
+                dessinerBoutonOutil(policeTexte, policeTexte);
                 afficherTempsRestant(tempsRestant, policeTexte);
                 if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
                     al_flip_display();
                 }
-                al_flip_display();
             }
             al_flip_display();
         }
