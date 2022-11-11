@@ -139,7 +139,7 @@ void initDonneesJeu(){
 
 
 void dessinerArrierePlanMenu(ALLEGRO_BITMAP *imageMenu){
-    al_draw_scaled_bitmap(imageMenu, 0, 0, 1200, 675, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    al_draw_scaled_bitmap(imageMenu, 0, 0, 1280, 738, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 1);
 }
 
 void dessinerBouton(int x1,int y1,int x2,int y2,ALLEGRO_COLOR couleur, char* texte, ALLEGRO_FONT* policeTexte,short taillePolice ){
@@ -163,13 +163,13 @@ ALLEGRO_FONT* initialiserPoliceTexte2(short taillePolice){
 
 ALLEGRO_FONT* initialiserPoliceTexteGrande(short taillePoliceGrande){
     ALLEGRO_FONT* policeTexteGrande = NULL ;
-    policeTexteGrande = al_load_ttf_font("Bangers-Regular.ttf", taillePoliceGrande,0);
+    policeTexteGrande = al_load_ttf_font("../Bangers-Regular.ttf", taillePoliceGrande,0);
     return policeTexteGrande;
 }
 
 ALLEGRO_FONT* initialiserPoliceTexteTitre(short taillePoliceTitre){
     ALLEGRO_FONT* policeTexteTitre = NULL ;
-    policeTexteTitre = al_load_ttf_font("Bangers-Regular.ttf", taillePoliceTitre,0);
+    policeTexteTitre = al_load_ttf_font("../Bangers-Regular.ttf", taillePoliceTitre,0);
     return policeTexteTitre;
 }
 
@@ -192,23 +192,30 @@ void dessinerTitre(ALLEGRO_FONT* policeTexteTitre){
     al_draw_text(policeTexteTitre, al_map_rgb(0,0,0), SCREEN_WIDTH / 4 -20, SCREEN_HEIGHT / 8, 0, "ECE CITY");
 }
 void dessinerBoutonMenu(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande, ALLEGRO_FONT* policeTexteTitre){
-    dessinerTitre(policeTexte);
-    dessinerBoutonGrand(SCREEN_WIDTH / 2 - 180, SCREEN_HEIGHT / 2 -60, SCREEN_WIDTH / 2 + 100,SCREEN_HEIGHT / 2+20, al_map_rgb(254, 177, 43), "Jouer", policeTexte, TAILLEPOLICEBOUTTONGRANDE);
+    dessinerTitre(policeTexteTitre);
+    dessinerBoutonGrand(SCREEN_WIDTH / 2 - 180, SCREEN_HEIGHT / 2 -60, SCREEN_WIDTH / 2 + 100,SCREEN_HEIGHT / 2+20, al_map_rgb(254, 177, 43), "Jouer", policeTexteGrande, TAILLEPOLICEBOUTTONGRANDE);
     dessinerBouton(SCREEN_WIDTH / 10 + 100, SCREEN_HEIGHT - 100, SCREEN_WIDTH / 3-50, SCREEN_HEIGHT - 50, al_map_rgb(226, 177, 107), "regles", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(SCREEN_WIDTH / 2 + 190, SCREEN_HEIGHT - 100, SCREEN_WIDTH - 300, SCREEN_HEIGHT - 50, al_map_rgb(226, 177, 107), "credit", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
 }
 void dessinerRegleDuJeu(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
     dessinerBouton(BOUTTONX1, BOUTTONY1, BOUTTONX2, BOUTTONY2, al_map_rgb(100,100,100), "retour", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
-    dessinerBouton(SCREEN_WIDTH /20+100,50 , SCREEN_WIDTH/2 + 100 , 120, al_map_rgb(100,100,100), "Regle du Jeu", policeTexte, TAILLEPOLICEBOUTTONGRANDE);
+    dessinerBouton(SCREEN_WIDTH /20+100,50 , SCREEN_WIDTH/2 + 100 , 120, al_map_rgb(100,100,100), "Regle du Jeu", policeTexteGrande, TAILLEPOLICEBOUTTONGRANDE);
 }
 
 void dessinerTexteRegleDuJeu(ALLEGRO_FONT* policeTexte){
     al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-450,0,"L'objectif de ce jeu est de developper sa ville" );
     al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-400,0,"Differents modes de jeu vous serons propose afin de vous amuser au maximum" );
-    al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-350,0,"Construiser des batiments toujours plus grands et plus nombreux afin d'augmenter le nombre d'habitant" );
+    al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-350,0,"Construiser des batiments toujours plus grands et plus nombreux afin d'augmenter le nombre d'habitants" );
     al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-300,0,"Gerer votre budget afin de pouvoir alimenter en eau et en electricite chaque habitation" );
     al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-250,0,"Arriverez-vous a être maire de cette ville et a la diriger ?" );
     al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-200,0,"A vous d’etre strategique pour y parvenir " );
+}
+
+void dessinerBoutonSelectionMode(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
+    dessinerBouton(SCREEN_WIDTH /20+100,50 , SCREEN_WIDTH/2 + 100 , 120, al_map_rgb(100,100,100), "MODES DE JEU", policeTexteGrande, TAILLEPOLICEBOUTTONGRANDE);
+    dessinerBouton(SCREEN_WIDTH / 12, SCREEN_HEIGHT - 500, SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 420, al_map_rgb(243,134,124), "Communisme", policeTexteGrande, TAILLEPOLICEBOUTTONGRANDE);
+    dessinerBouton(SCREEN_WIDTH / 12, SCREEN_HEIGHT - 300, SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 220, al_map_rgb(243,134,124), "Capitalisme", policeTexteGrande, TAILLEPOLICEBOUTTONGRANDE);
+    dessinerBouton(SCREEN_WIDTH -130, SCREEN_HEIGHT - 700, SCREEN_WIDTH -30, SCREEN_HEIGHT - 650, al_map_rgb(183, 42, 81), "retour", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
 }
 
 void afficherChrono(double angle, ALLEGRO_COLOR couleur){
@@ -302,7 +309,7 @@ int main() {
     ALLEGRO_EVENT_QUEUE *queue = NULL;
     ALLEGRO_EVENT_QUEUE *temps = NULL;
     ALLEGRO_EVENT event;
-    ALLEGRO_BITMAP *imageMenu = al_load_bitmap("image_menu.jpg");
+    ALLEGRO_BITMAP *imageMenu = al_load_bitmap("../etape1.png");
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_TIMER *timer = NULL;
     queue = al_create_event_queue();
@@ -352,7 +359,10 @@ int main() {
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 2 + 190, SCREEN_HEIGHT - 100, SCREEN_WIDTH - 300, SCREEN_HEIGHT - 50) && etape == 0) {
                     etape = 2;
                 }
-                if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 500, SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 420) && etape == 1) {
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 2 - 180, SCREEN_HEIGHT / 2 -60, SCREEN_WIDTH / 2 + 100,SCREEN_HEIGHT / 2+20) &&etape == 0) {
+                    etape = 3;
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 500, SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 420) && etape == 3) {
                     etape = 5;
                     mode = 1;
                 }
@@ -363,9 +373,8 @@ int main() {
             }
         }
         if (etape == 0) {
-            al_clear_to_color(al_map_rgb(255, 255, 255));
+            al_clear_to_color(al_map_rgb(0, 0, 0));
             //dessinerArrierePlanMenu(imageMenu);
-            dessinerTitre(policeTexte);
             dessinerBoutonMenu(policeTexte,policeTexteGrande, policeTexteTitre);
         }
         if (etape==1){
@@ -378,6 +387,11 @@ int main() {
             al_clear_to_color(al_map_rgb(0, 0, 0));
             dessinerInformationsGenerales(policeTexte2,policeTexteGrande);
         }
+        if (etape==3){
+            al_clear_to_color(al_map_rgb(0, 0, 0));
+            dessinerBoutonSelectionMode(policeTexte2, policeTexteGrande);
+        }
+
 
 
         /*case ALLEGRO_EVENT_TIMER : {
