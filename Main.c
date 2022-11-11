@@ -64,41 +64,13 @@ typedef struct Joueur{
 
 Bouton tabBoutonPause[3];
 
-void initialiserTabBoutonPause(){
-    tabBoutonPause[0].x1Bouton = 440;
-    tabBoutonPause[1].x1Bouton = 440;
-    tabBoutonPause[2].x1Bouton = 440;
-    tabBoutonPause[0].x2Bouton = 760;
-    tabBoutonPause[1].x2Bouton = 760;
-    tabBoutonPause[2].x2Bouton = 760;
-    tabBoutonPause[0].y1Bouton = 305;
-    tabBoutonPause[1].y1Bouton = 405;
-    tabBoutonPause[2].y1Bouton = 505;
-    tabBoutonPause[0].y2Bouton = 395;
-    tabBoutonPause[1].y2Bouton = 495;
-    tabBoutonPause[2].y2Bouton = 595;
-    strcpy(tabBoutonPause[0].nomBouton, "REPRENDRE PARTIE");
-    strcpy(tabBoutonPause[1].nomBouton, "SAUVEGARDER");
-    strcpy(tabBoutonPause[2].nomBouton, "CONTACTER SAV");
-    tabBoutonPause[0].couleurBouton = al_map_rgb(180,180,180);
-    tabBoutonPause[0].couleurTexte = al_map_rgb(10,0,0);
-    tabBoutonPause[0].couleurPassageBouton = al_map_rgb(200,0,250);
-    tabBoutonPause[1].couleurBouton = al_map_rgb(180,180,180);
-    tabBoutonPause[1].couleurTexte = al_map_rgb(10,0,0);
-    tabBoutonPause[1].couleurPassageBouton = al_map_rgb(200,0,250);
-    tabBoutonPause[2].couleurBouton = al_map_rgb(180,180,180);
-    tabBoutonPause[2].couleurTexte = al_map_rgb(10,0,0);
-    tabBoutonPause[2].couleurPassageBouton = al_map_rgb(200,0,250);
-    tabBoutonPause[0].taillePolice =15;
-}
-
 
 void initAllegro(){
     al_init();
     al_init_primitives_addon();
     al_init_font_addon();
     al_init_ttf_addon();
-    //al_init_image_addon();
+    al_init_image_addon();
     //al_install_keyboard();
     al_install_mouse();
     //al_install_audio();
@@ -166,6 +138,10 @@ void initDonneesJeu(){
 }
 
 
+void dessinerArrierePlanMenu(ALLEGRO_BITMAP *imageMenu){
+    al_draw_scaled_bitmap(imageMenu, 0, 0, 1200, 675, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+}
+
 void dessinerBouton(int x1,int y1,int x2,int y2,ALLEGRO_COLOR couleur, char* texte, ALLEGRO_FONT* policeTexte,short taillePolice ){
     al_draw_filled_rectangle(x1, y1, x2, y2,couleur);
     al_draw_rectangle(x1,y1,x2,y2, al_map_rgb(50,50,50), 2);
@@ -178,11 +154,6 @@ void dessinerCadre(int x1,int y1,int x2,int y2,ALLEGRO_COLOR couleur ){
     al_draw_rectangle(x1,y1,x2,y2, al_map_rgb(50,50,50), 2);
 }
 
-void dessinnerBouton(int x1,int y1,int x2,int y2,ALLEGRO_COLOR couleur, char* texte, ALLEGRO_FONT* policeTexte,short taillePolice ){
-    al_draw_filled_rectangle(x1, y1, x2, y2,couleur);
-    al_draw_rectangle(x1,y1,x2,y2, al_map_rgb(50,50,50), 2);
-    al_draw_text(policeTexte, al_map_rgb(0,0,0),(x1 +x2)/2 - strlen(texte)*taillePolice/5, (y2+y1)/2-taillePolice/2,0,texte );
-}
 
 ALLEGRO_FONT* initialiserPoliceTexte2(short taillePolice){
     ALLEGRO_FONT* policeTexte = NULL ;
@@ -192,13 +163,13 @@ ALLEGRO_FONT* initialiserPoliceTexte2(short taillePolice){
 
 ALLEGRO_FONT* initialiserPoliceTexteGrande(short taillePoliceGrande){
     ALLEGRO_FONT* policeTexteGrande = NULL ;
-    policeTexteGrande = al_load_ttf_font("", taillePoliceGrande,0);
+    policeTexteGrande = al_load_ttf_font("Bangers-Regular.ttf", taillePoliceGrande,0);
     return policeTexteGrande;
 }
 
 ALLEGRO_FONT* initialiserPoliceTexteTitre(short taillePoliceTitre){
     ALLEGRO_FONT* policeTexteTitre = NULL ;
-    policeTexteTitre = al_load_ttf_font("", taillePoliceTitre,0);
+    policeTexteTitre = al_load_ttf_font("Bangers-Regular.ttf", taillePoliceTitre,0);
     return policeTexteTitre;
 }
 
@@ -206,6 +177,38 @@ void dessinerBoutonGrand(int x1,int y1,int x2,int y2,ALLEGRO_COLOR couleur, char
     al_draw_filled_rectangle(x1, y1, x2, y2,couleur);
     al_draw_rectangle(x1,y1,x2,y2, al_map_rgb(50,50,50), 2);
     al_draw_text(policeTexteGrande, al_map_rgb(0,0,0),(x1 +x2)/2-15 - strlen(texte)*taillePoliceGrande/5, (y2+y1)/2-taillePoliceGrande/2,0,texte );
+}
+
+void dessinerInformationsGenerales(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
+    dessinerBouton(BOUTTONX1, BOUTTONY1, BOUTTONX2, BOUTTONY2, al_map_rgb(100,100,100), "retour", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBoutonGrand(SCREEN_WIDTH / 2 - 200, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2 + 200, SCREEN_HEIGHT / 3, al_map_rgb(100,100,100), "SIMS", policeTexte, TAILLEPOLICEBOUTTONGRANDE);
+    dessinerBoutonGrand(SCREEN_WIDTH / 20, SCREEN_HEIGHT / 2 - 30, SCREEN_WIDTH / 3,SCREEN_HEIGHT /2+30, al_map_rgb(100,100,100), "Realise par :", policeTexte, TAILLEPOLICEBOUTTONGRANDE);
+    dessinerBouton(SCREEN_WIDTH / 20, SCREEN_HEIGHT - 300, SCREEN_WIDTH / 3, SCREEN_HEIGHT - 250, al_map_rgb(100,100,100), "Emilien", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(SCREEN_WIDTH / 20, SCREEN_HEIGHT - 240, SCREEN_WIDTH / 3, SCREEN_HEIGHT - 190, al_map_rgb(100,100,100), "Lucie", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(SCREEN_WIDTH / 20, SCREEN_HEIGHT - 180, SCREEN_WIDTH / 3, SCREEN_HEIGHT - 130, al_map_rgb(100,100,100), "Rémi", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(SCREEN_WIDTH / 20, SCREEN_HEIGHT - 120, SCREEN_WIDTH / 3, SCREEN_HEIGHT - 70, al_map_rgb(100,100,100), "Amaury", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+}
+void dessinerTitre(ALLEGRO_FONT* policeTexteTitre){
+    al_draw_text(policeTexteTitre, al_map_rgb(0,0,0), SCREEN_WIDTH / 4 -20, SCREEN_HEIGHT / 8, 0, "ECE CITY");
+}
+void dessinerBoutonMenu(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande, ALLEGRO_FONT* policeTexteTitre){
+    dessinerTitre(policeTexte);
+    dessinerBoutonGrand(SCREEN_WIDTH / 2 - 180, SCREEN_HEIGHT / 2 -60, SCREEN_WIDTH / 2 + 100,SCREEN_HEIGHT / 2+20, al_map_rgb(254, 177, 43), "Jouer", policeTexte, TAILLEPOLICEBOUTTONGRANDE);
+    dessinerBouton(SCREEN_WIDTH / 10 + 100, SCREEN_HEIGHT - 100, SCREEN_WIDTH / 3-50, SCREEN_HEIGHT - 50, al_map_rgb(226, 177, 107), "regles", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(SCREEN_WIDTH / 2 + 190, SCREEN_HEIGHT - 100, SCREEN_WIDTH - 300, SCREEN_HEIGHT - 50, al_map_rgb(226, 177, 107), "credit", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+}
+void dessinerRegleDuJeu(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
+    dessinerBouton(BOUTTONX1, BOUTTONY1, BOUTTONX2, BOUTTONY2, al_map_rgb(100,100,100), "retour", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(SCREEN_WIDTH /20+100,50 , SCREEN_WIDTH/2 + 100 , 120, al_map_rgb(100,100,100), "Regle du Jeu", policeTexte, TAILLEPOLICEBOUTTONGRANDE);
+}
+
+void dessinerTexteRegleDuJeu(ALLEGRO_FONT* policeTexte){
+    al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-450,0,"L'objectif de ce jeu est de developper sa ville" );
+    al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-400,0,"Differents modes de jeu vous serons propose afin de vous amuser au maximum" );
+    al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-350,0,"Construiser des batiments toujours plus grands et plus nombreux afin d'augmenter le nombre d'habitant" );
+    al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-300,0,"Gerer votre budget afin de pouvoir alimenter en eau et en electricite chaque habitation" );
+    al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-250,0,"Arriverez-vous a être maire de cette ville et a la diriger ?" );
+    al_draw_text(policeTexte, al_map_rgb(0,0,0), SCREEN_WIDTH - SCREEN_WIDTH + 50, SCREEN_HEIGHT-200,0,"A vous d’etre strategique pour y parvenir " );
 }
 
 void afficherChrono(double angle, ALLEGRO_COLOR couleur){
@@ -296,11 +299,10 @@ void dessinerBoutonOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGran
 
 int main() {
     initAllegro();
-    initialiserTabBoutonPause();
     ALLEGRO_EVENT_QUEUE *queue = NULL;
     ALLEGRO_EVENT_QUEUE *temps = NULL;
     ALLEGRO_EVENT event;
-    //ALLEGRO_BITMAP * map = al_load_bitmap("");
+    ALLEGRO_BITMAP *imageMenu = al_load_bitmap("image_menu.jpg");
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_TIMER *timer = NULL;
     queue = al_create_event_queue();
@@ -317,10 +319,14 @@ int main() {
     ALLEGRO_MOUSE_STATE sourisState;
     //ALLEGRO_KEYBOARD_STATE clavierState;
     short taillePolice = 12;
+    short etape=0;
+    short mode = 0;
     float tempsRestant = 0.0;
     ALLEGRO_FONT  * policeTexte = initialiserPoliceTexte(taillePolice);
     //ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
-    //ALLEGRO_FONT  * policeTexte2 = initialiserPoliceTexte2(TAILLEPOLICEBOUTTONNORMALE);
+    ALLEGRO_FONT  * policeTexte2 = initialiserPoliceTexte2(TAILLEPOLICEBOUTTONNORMALE);
+    ALLEGRO_FONT * policeTexteGrande = initialiserPoliceTexteGrande(TAILLEPOLICEBOUTTONGRANDE);
+    ALLEGRO_FONT * policeTexteTitre = initialiserPoliceTexteTitre(TAILLEPOLICETITRE);
     initDonneesJeu();
     initialiserCasesGrille();
     bool fin = false;
@@ -336,21 +342,60 @@ int main() {
                 fin = true;
                 break;
             }
-            case ALLEGRO_EVENT_TIMER : {
-                tempsRestant += 0.1;
-                al_clear_to_color(al_map_rgb(255, 255, 255));
-                dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
-                al_get_mouse_state(&sourisState);
-                colorierCaseGrille(sourisState.x, sourisState.y);
-                dessinnerTouteCasesColorie();
-                dessinerBoutonOutil(policeTexte, policeTexte);
-                afficherTempsRestant(tempsRestant, policeTexte);
-                if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
-                    al_flip_display();
+            case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN : {
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, BOUTTONX1, BOUTTONY1, BOUTTONX2, BOUTTONY2)) {
+                    etape = 0;
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 10 + 100, SCREEN_HEIGHT - 100, SCREEN_WIDTH / 3-50, SCREEN_HEIGHT - 50) && etape == 0) {
+                    etape = 1;
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 2 + 190, SCREEN_HEIGHT - 100, SCREEN_WIDTH - 300, SCREEN_HEIGHT - 50) && etape == 0) {
+                    etape = 2;
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 500, SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 420) && etape == 1) {
+                    etape = 5;
+                    mode = 1;
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 300, SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 220) && etape == 1) {
+                    etape = 5;
+                    mode = 4;
                 }
             }
-            al_flip_display();
         }
+        if (etape == 0) {
+            al_clear_to_color(al_map_rgb(255, 255, 255));
+            //dessinerArrierePlanMenu(imageMenu);
+            dessinerTitre(policeTexte);
+            dessinerBoutonMenu(policeTexte,policeTexteGrande, policeTexteTitre);
+        }
+        if (etape==1){
+            al_clear_to_color(al_map_rgb(0, 0, 0));
+            dessinerRegleDuJeu(policeTexte2,policeTexteGrande);
+            dessinerCadre(SCREEN_WIDTH - SCREEN_WIDTH + 40,SCREEN_HEIGHT/3,SCREEN_WIDTH - 40 ,SCREEN_HEIGHT-100, al_map_rgb(50,50,50));
+            dessinerTexteRegleDuJeu(policeTexte2);
+        }
+        if (etape==2){
+            al_clear_to_color(al_map_rgb(0, 0, 0));
+            dessinerInformationsGenerales(policeTexte2,policeTexteGrande);
+        }
+
+
+        /*case ALLEGRO_EVENT_TIMER : {
+            tempsRestant += 0.1;
+            al_clear_to_color(al_map_rgb(255, 255, 255));
+            dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
+            al_get_mouse_state(&sourisState);
+            colorierCaseGrille(sourisState.x, sourisState.y);
+            dessinnerTouteCasesColorie();
+            dessinerBoutonOutil(policeTexte, policeTexte);
+            afficherTempsRestant(tempsRestant, policeTexte);
+            if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
+                al_flip_display();
+            }
+        }
+        al_flip_display();
+         */
+        al_flip_display();
     }
     while (!fin);
     al_destroy_display(display);
