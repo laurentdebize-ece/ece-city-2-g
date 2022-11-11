@@ -350,7 +350,7 @@ int main() {
                 break;
             }
             case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN : {
-                if (checkSourisDansBouton(sourisState.x, sourisState.y, BOUTTONX1, BOUTTONY1, BOUTTONX2, BOUTTONY2)) {
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, BOUTTONX1, BOUTTONY1, BOUTTONX2, BOUTTONY2 )&& etape <=3) {
                     etape = 0;
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 10 + 100, SCREEN_HEIGHT - 100, SCREEN_WIDTH / 3-50, SCREEN_HEIGHT - 50) && etape == 0) {
@@ -363,18 +363,19 @@ int main() {
                     etape = 3;
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 500, SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 420) && etape == 3) {
-                    etape = 5;
+                    etape = 4;
                     mode = 1;
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 300, SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 220) && etape == 1) {
-                    etape = 5;
-                    mode = 4;
+                    etape = 4;
+                    mode = 2;
                 }
+
             }
         }
         if (etape == 0) {
             al_clear_to_color(al_map_rgb(0, 0, 0));
-            //dessinerArrierePlanMenu(imageMenu);
+            dessinerArrierePlanMenu(imageMenu);
             dessinerBoutonMenu(policeTexte,policeTexteGrande, policeTexteTitre);
         }
         if (etape==1){
@@ -391,24 +392,24 @@ int main() {
             al_clear_to_color(al_map_rgb(0, 0, 0));
             dessinerBoutonSelectionMode(policeTexte2, policeTexteGrande);
         }
-
-
-
-        /*case ALLEGRO_EVENT_TIMER : {
-            tempsRestant += 0.1;
-            al_clear_to_color(al_map_rgb(255, 255, 255));
-            dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
-            al_get_mouse_state(&sourisState);
-            colorierCaseGrille(sourisState.x, sourisState.y);
-            dessinnerTouteCasesColorie();
-            dessinerBoutonOutil(policeTexte, policeTexte);
-            afficherTempsRestant(tempsRestant, policeTexte);
-            if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
-                al_flip_display();
+        if (etape==4){
+            if (event.type == ALLEGRO_EVENT_TIMER) {
+                tempsRestant += 0.1;
+                al_clear_to_color(al_map_rgb(255, 255, 255));
+                dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
+                al_get_mouse_state(&sourisState);
+                colorierCaseGrille(sourisState.x, sourisState.y);
+                dessinnerTouteCasesColorie();
+                dessinerBoutonOutil(policeTexte, policeTexte);
+                afficherTempsRestant(tempsRestant, policeTexte);
+                if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
+                    al_flip_display();
+                }
             }
+            al_flip_display();
         }
-        al_flip_display();
-         */
+
+
         al_flip_display();
     }
     while (!fin);
