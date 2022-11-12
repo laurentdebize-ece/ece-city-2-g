@@ -32,6 +32,59 @@
 #define X2GRILLE 807
 #define Y1GRILLE 20
 #define Y2GRILLE 628
+
+#define X1OUTIL 830
+#define X2OUTIL 1200
+#define Y1OUTIL 300
+#define Y2OUTIL 360
+
+#define X1NIVEAU0 830
+#define X2NIVEAU0 970
+#define Y1NIVEAU0 380
+#define Y2NIVEAU0 420
+#define X1NIVEAU1 830
+#define X2NIVEAU1 970
+#define Y1NIVEAU1 440
+#define Y2NIVEAU1 480
+#define X1NIVEAU2 830
+#define X2NIVEAU2 970
+#define Y1NIVEAU2 500
+#define Y2NIVEAU2 540
+
+#define X1TERRAIN 1050
+#define X2TERRAIN 1200
+#define Y1TERRAIN 380
+#define Y2TERRAIN 420
+#define X1CITERNE 1050
+#define X2CITERNE 1200
+#define Y1CITERNE 440
+#define Y2CITERNE 480
+#define X1USINE 1050
+#define X2USINE 1200
+#define Y1USINE 500
+#define Y2USINE 540
+
+#define X1ARGENT 830
+#define X2ARGENT 970
+#define Y1ARGENT 180
+#define Y2ARGENT 220
+#define X1HABITANT 830
+#define X2HABITANT 970
+#define Y1HABITANT 240
+#define Y2HABITANT 280
+
+#define X1CAPEAU 1050
+#define X2CAPEAU 1200
+#define Y1CAPEAU 180
+#define Y2CAPEAU 220
+#define X1CAPELEC 1050
+#define X2CAPELEC 1200
+#define Y1CAPELEC 240
+#define Y2CAPELEC 280
+
+
+
+
 #define MONTER  1
 #define DESCENDRE 3
 #define DROITE 2
@@ -299,10 +352,24 @@ void colorierCaseGrille(short xSouris, short ySouris){
 }
 
 void dessinerBoutonOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
-    dessinerBouton(X2GRILLE +20, Y1GRILLE , X2GRILLE +170, Y1GRILLE +50, al_map_rgb(150,150,150), "outils", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1OUTIL, Y1OUTIL , X2OUTIL ,Y2OUTIL , al_map_rgb(150,150,150), "OUTILS", policeTexteGrande, TAILLEPOLICEBOUTTONGRANDE);
 }
 
+void dessinerBoiteOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
+    dessinerBouton(X1NIVEAU0, Y1NIVEAU0 , X2NIVEAU0 ,Y2NIVEAU0 , al_map_rgb(150,150,150), "niveau 0", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1NIVEAU1, Y1NIVEAU1 , X2NIVEAU1 ,Y2NIVEAU1 , al_map_rgb(150,150,150), "iveau -1", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1NIVEAU2, Y1NIVEAU2 , X2NIVEAU2 ,Y2NIVEAU2 , al_map_rgb(150,150,150), "niveau -2", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1TERRAIN, Y1TERRAIN , X2TERRAIN ,Y2TERRAIN , al_map_rgb(150,150,150), "terrain", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1CITERNE, Y1CITERNE , X2CITERNE ,Y2CITERNE , al_map_rgb(150,150,150), "citerne", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1USINE, Y1USINE , X2USINE,Y2USINE , al_map_rgb(150,150,150), "usine", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+}
 
+void dessinerInfosJeu(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande,int argent , int habitant, int  capelec, int capeau) {
+    al_draw_text(policeTexteGrande, al_map_rgb(0,0,0), X1ARGENT, Y1ARGENT,0,("argent : " ));
+    al_draw_text(policeTexteGrande, al_map_rgb(0,0,0), X1HABITANT,Y1HABITANT,0,("habitant : " ));
+    al_draw_text(policeTexteGrande, al_map_rgb(0,0,0), X1CAPEAU, Y1CAPEAU,0,("cap eau : " ));
+    al_draw_text(policeTexteGrande, al_map_rgb(0,0,0), X1CAPELEC, Y1CAPELEC,0,("cap elec : " ));
+}
 
 int main() {
     initAllegro();
@@ -328,6 +395,11 @@ int main() {
     short taillePolice = 12;
     short etape=0;
     short mode = 0;
+    short boite = 0;
+    int argent = 500000;
+    int habitant = 0;
+    int capeau = 0;
+    int capelec = 0;
     float tempsRestant = 0.0;
     ALLEGRO_FONT  * policeTexte = initialiserPoliceTexte(taillePolice);
     //ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
@@ -370,12 +442,19 @@ int main() {
                     etape = 4;
                     mode = 2;
                 }
-
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1OUTIL, Y1OUTIL, X2OUTIL, Y2OUTIL) && etape == 4 ) {
+                    if(boite){
+                        boite = 0;
+                    }
+                    else{
+                        boite +=1;
+                    }
+                }
             }
         }
         if (etape == 0) {
             al_clear_to_color(al_map_rgb(0, 0, 0));
-            dessinerArrierePlanMenu(imageMenu);
+            //dessinerArrierePlanMenu(imageMenu);
             dessinerBoutonMenu(policeTexte,policeTexteGrande, policeTexteTitre);
         }
         if (etape==1){
@@ -400,16 +479,18 @@ int main() {
                 al_get_mouse_state(&sourisState);
                 colorierCaseGrille(sourisState.x, sourisState.y);
                 dessinnerTouteCasesColorie();
-                dessinerBoutonOutil(policeTexte, policeTexte);
                 afficherTempsRestant(tempsRestant, policeTexte);
+                dessinerBoutonOutil(policeTexte, policeTexte);
+                dessinerInfosJeu(policeTexte, policeTexte,argent , habitant, capelec,capeau);
+                if(boite){
+                    dessinerBoiteOutil(policeTexte, policeTexte);
+                }
                 if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
                     al_flip_display();
                 }
             }
             al_flip_display();
         }
-
-
         al_flip_display();
     }
     while (!fin);
@@ -417,5 +498,6 @@ int main() {
     display = NULL;
     al_destroy_timer(timer);
     al_destroy_event_queue(temps);
+    al_destroy_bitmap(imageMenu);
     return 0;
 }
