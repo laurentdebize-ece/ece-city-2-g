@@ -343,19 +343,13 @@ void dessinneGrille( int x1, int y1, int x2, int y2, int epaisseur, ALLEGRO_COLO
 
 
 
-void colorierCaseGrille(short xSouris, short ySouris){
+void colorierCaseSouris(short xSouris, short ySouris){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
-            if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),
-                                      coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),
-                                      coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),
-                                      coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
-                matriceCase[j][i].couleurCase = al_map_rgba(80, 80, 80, 0.4);
+            if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
+                //matriceCase[j][i].couleurCase = al_map_rgb(250, 0, 0);
+                al_draw_filled_rectangle(coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),al_map_rgb(40,40,40));
             }
-            /*
-            else if(matriceCase[j][i].obstacle != -1){matriceCase[j][i].couleurCase = al_map_rgba(0,0,0, 0);}
-            else if(matriceCase[j][i].obstacle == -1 ){matriceCase[j][i].couleurCase  = al_map_rgba(0,0,130,100);}
-             */
         }
     }
 }
@@ -411,7 +405,7 @@ int main() {
     int habitant = 0;
     int capeau = 0;
     int capelec = 0;
-    float tempsRestant = 0.0;
+    double tempsRestant = 0.0;
     short mois = 0;
     short niveau =0;
     ALLEGRO_FONT  * policeTexte = initialiserPoliceTexte(taillePolice);
@@ -495,12 +489,17 @@ int main() {
         }
         if (etape==4){
             if (event.type == ALLEGRO_EVENT_TIMER) {
-                tempsRestant += 0.1;
+                if(tempsRestant == 15.0){
+                    tempsRestant = 0.0;
+                }
+                else{
+                    tempsRestant += 0.1;
+                }
                 mois = tempsRestant/15;
                 al_clear_to_color(al_map_rgb(255, 255, 255));
                 dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
                 al_get_mouse_state(&sourisState);
-                colorierCaseGrille(sourisState.x, sourisState.y);
+                colorierCaseSouris(sourisState.x, sourisState.y);
                 dessinnerTouteCasesColorie();
                 afficherTempsRestant(tempsRestant,mois, policeTexte);
                 dessinerBoutonOutil(policeTexte, policeTexte);
