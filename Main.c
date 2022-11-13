@@ -29,58 +29,66 @@
 #define XCHRONO 1100
 #define YCHRONO 45
 #define X1GRILLE 20
-#define X2GRILLE 807
+#define X2GRILLE 740
 #define Y1GRILLE 20
-#define Y2GRILLE 628
+#define Y2GRILLE 580
 
 #define X1OUTIL 830
 #define X2OUTIL 1200
-#define Y1OUTIL 300
-#define Y2OUTIL 360
+#define Y1OUTIL 240
+#define Y2OUTIL 300
 
 #define X1NIVEAU0 830
 #define X2NIVEAU0 970
-#define Y1NIVEAU0 380
-#define Y2NIVEAU0 420
+#define Y1NIVEAU0 320
+#define Y2NIVEAU0 360
 #define X1NIVEAU1 830
 #define X2NIVEAU1 970
-#define Y1NIVEAU1 440
-#define Y2NIVEAU1 480
+#define Y1NIVEAU1 380
+#define Y2NIVEAU1 420
 #define X1NIVEAU2 830
 #define X2NIVEAU2 970
-#define Y1NIVEAU2 500
-#define Y2NIVEAU2 540
+#define Y1NIVEAU2 440
+#define Y2NIVEAU2 480
+#define X1DESTRUCTION 830
+#define X2DESTRUCTION 970
+#define Y1DESTRUCTION 500
+#define Y2DESTRUCTION 540
 
 #define X1TERRAIN 1050
 #define X2TERRAIN 1200
-#define Y1TERRAIN 380
-#define Y2TERRAIN 420
+#define Y1TERRAIN 320
+#define Y2TERRAIN 360
 #define X1CITERNE 1050
 #define X2CITERNE 1200
-#define Y1CITERNE 440
-#define Y2CITERNE 480
+#define Y1CITERNE 380
+#define Y2CITERNE 420
 #define X1USINE 1050
 #define X2USINE 1200
-#define Y1USINE 500
-#define Y2USINE 540
+#define Y1USINE 440
+#define Y2USINE 480
+#define X1ROUTE 1050
+#define X2ROUTE 1200
+#define Y1ROUTE 500
+#define Y2ROUTE 540
 
 #define X1ARGENT 830
 #define X2ARGENT 970
-#define Y1ARGENT 180
-#define Y2ARGENT 220
+#define Y1ARGENT 140
+#define Y2ARGENT 180
 #define X1HABITANT 830
 #define X2HABITANT 970
-#define Y1HABITANT 240
-#define Y2HABITANT 280
+#define Y1HABITANT 180
+#define Y2HABITANT 220
 
 #define X1CAPEAU 1050
 #define X2CAPEAU 1200
-#define Y1CAPEAU 180
-#define Y2CAPEAU 220
+#define Y1CAPEAU 140
+#define Y2CAPEAU 180
 #define X1CAPELEC 1050
 #define X2CAPELEC 1200
-#define Y1CAPELEC 240
-#define Y2CAPELEC 280
+#define Y1CAPELEC 180
+#define Y2CAPELEC 220
 
 
 
@@ -283,8 +291,9 @@ void afficherChrono(double angle, ALLEGRO_COLOR couleur){
 
 
 
-void afficherTempsRestant(float tempsRestant, ALLEGRO_FONT* policeTexte){
+void afficherTempsRestant(float tempsRestant,float mois, ALLEGRO_FONT* policeTexte){
     al_draw_textf(policeTexte, al_map_rgb(0,0,0), XCHRONO + 60, YCHRONO - 20,0,"%.1f secondes", tempsRestant);
+    al_draw_textf(policeTexte, al_map_rgb(0,0,0), XCHRONO + 60, YCHRONO ,0,"%.0f mois", mois);
     double angle = (tempsRestant)*(-0.42);
     if(tempsRestant <= 3){
         afficherChrono(angle, al_map_rgb(190,0,0));
@@ -320,12 +329,12 @@ void dessinneGrille( int x1, int y1, int x2, int y2, int epaisseur, ALLEGRO_COLO
     float largeurCase = largeurCaseGrille(x1, x2);
     float hauteurCase = hauteurCaseGrille(y1, y2);
     for(int i = 0; i <= NOMBRECOLONNE; i++){
-        al_draw_line( x1 + i*largeurCase, y1,x1 +i* largeurCase , y2-13, couleurGrille, epaisseur);
+        al_draw_line( x1 + i*largeurCase, y1,x1 +i* largeurCase , y2, couleurGrille, epaisseur);
         if(i<NOMBRECOLONNE){
             al_draw_textf(policeTexte,couleurGrille, x1 + i*largeurCase +3, y1 - 13,0,"%d", i+1);}
     }
     for(int j = 0; j <= NOMBRELIGNE; j++){
-        al_draw_line(x1, y1+ j*hauteurCase, x2-22, y1 + j*hauteurCase, couleurGrille, epaisseur);
+        al_draw_line(x1, y1+ j*hauteurCase, x2, y1 + j*hauteurCase, couleurGrille, epaisseur);
         if(j<NOMBRELIGNE){
             al_draw_textf(policeTexte, couleurGrille,x1 -22, y1 + j*hauteurCase +2,0,"  %d", j+1 );}
     }
@@ -362,13 +371,15 @@ void dessinerBoiteOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrand
     dessinerBouton(X1TERRAIN, Y1TERRAIN , X2TERRAIN ,Y2TERRAIN , al_map_rgb(150,150,150), "terrain", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1CITERNE, Y1CITERNE , X2CITERNE ,Y2CITERNE , al_map_rgb(150,150,150), "citerne", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1USINE, Y1USINE , X2USINE,Y2USINE , al_map_rgb(150,150,150), "usine", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1DESTRUCTION, Y1DESTRUCTION , X2DESTRUCTION ,Y2DESTRUCTION , al_map_rgb(150,150,150), "detruire", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1ROUTE, Y1ROUTE , X2ROUTE,Y2ROUTE , al_map_rgb(150,150,150), "route", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
 }
 
-void dessinerInfosJeu(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande,int argent , int habitant, int  capelec, int capeau) {
-    al_draw_text(policeTexteGrande, al_map_rgb(0,0,0), X1ARGENT, Y1ARGENT,0,("argent : " ));
-    al_draw_text(policeTexteGrande, al_map_rgb(0,0,0), X1HABITANT,Y1HABITANT,0,("habitant : " ));
-    al_draw_text(policeTexteGrande, al_map_rgb(0,0,0), X1CAPEAU, Y1CAPEAU,0,("cap eau : " ));
-    al_draw_text(policeTexteGrande, al_map_rgb(0,0,0), X1CAPELEC, Y1CAPELEC,0,("cap elec : " ));
+void dessinerInfosJeu(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande,float argent , float habitant, float  capelec, float capeau) {
+    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1ARGENT, Y1ARGENT,0,"argent : %.0f",argent );
+    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1HABITANT,Y1HABITANT,0,"habitant : %.0f",habitant);
+    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1CAPEAU, Y1CAPEAU,0,"cap eau : %.0f",capeau);
+    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1CAPELEC, Y1CAPELEC,0,"cap elec : %.0f",capelec);
 }
 
 int main() {
@@ -392,8 +403,8 @@ int main() {
     al_clear_to_color(al_map_rgb(255, 255, 255));
     ALLEGRO_MOUSE_STATE sourisState;
     //ALLEGRO_KEYBOARD_STATE clavierState;
-    short taillePolice = 12;
-    short etape=0;
+    short taillePolice = 14;
+    short etape= 0;
     short mode = 0;
     short boite = 0;
     int argent = 500000;
@@ -401,6 +412,8 @@ int main() {
     int capeau = 0;
     int capelec = 0;
     float tempsRestant = 0.0;
+    short mois = 0;
+    short niveau =0;
     ALLEGRO_FONT  * policeTexte = initialiserPoliceTexte(taillePolice);
     //ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
     ALLEGRO_FONT  * policeTexte2 = initialiserPoliceTexte2(TAILLEPOLICEBOUTTONNORMALE);
@@ -450,6 +463,15 @@ int main() {
                         boite +=1;
                     }
                 }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1NIVEAU0, Y1NIVEAU0, X2NIVEAU0, Y2NIVEAU0) && etape == 4 && boite) {
+                    niveau =0;
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1NIVEAU1, Y1NIVEAU1, X2NIVEAU1, Y2NIVEAU1) && etape == 4 && boite) {
+                    niveau = 1;
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1NIVEAU2, Y1NIVEAU2, X2NIVEAU2, Y2NIVEAU2) && etape == 4 && boite) {
+                    niveau = 2;
+                }
             }
         }
         if (etape == 0) {
@@ -474,12 +496,13 @@ int main() {
         if (etape==4){
             if (event.type == ALLEGRO_EVENT_TIMER) {
                 tempsRestant += 0.1;
+                mois = tempsRestant/15;
                 al_clear_to_color(al_map_rgb(255, 255, 255));
                 dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
                 al_get_mouse_state(&sourisState);
                 colorierCaseGrille(sourisState.x, sourisState.y);
                 dessinnerTouteCasesColorie();
-                afficherTempsRestant(tempsRestant, policeTexte);
+                afficherTempsRestant(tempsRestant,mois, policeTexte);
                 dessinerBoutonOutil(policeTexte, policeTexte);
                 dessinerInfosJeu(policeTexte, policeTexte,argent , habitant, capelec,capeau);
                 if(boite){
