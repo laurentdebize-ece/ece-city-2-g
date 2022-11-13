@@ -118,6 +118,10 @@ typedef struct Case{
 
 Case matriceCase[NOMBRELIGNE][NOMBRECOLONNE];
 
+typedef struct souris{
+    short Casex, Casey;
+    bool interieurPlateau;
+}souris;
 
 typedef struct Joueur{
     int numJoueur,  ligne, colonne;
@@ -195,21 +199,29 @@ void initialiserCasesGrille(){
         }
     }
 }
-
-/*
-Bouton * initialiserTabBouton(){
-    strcpy(tabBouton[3].nomBouton, "boite à outil");
-    tabBouton[3].couleurBouton = al_map_rgb(180,180,180);
-    tabBouton[3].couleurTexte = al_map_rgb(0,0,0);
-    tabBouton[3].couleurPassageBouton = al_map_rgb(200,0,0);
-    tabBouton[3].x1Bouton = 740 ;
-    tabBouton[3].x2Bouton = 830;
-    tabBouton[3].y1Bouton = 620;
-    tabBouton[3].y2Bouton = 655;
-    tabBouton[3].taillePolice =15 ;
-    return &tabBouton[0];
+void chercherCaseDeLaSourie(int x, int y, int *caseX, int *caseY, bool *dansPlateau) {
+    if ((x >= 20 && x <= 920) && (y >= 20 && y <= 720)) {
+        *dansPlateau = true;
+    } else {
+        *dansPlateau = false;
+    }
+    int a = 0;
+    for (int i = 0; i < NOMBRELIGNE; i++) {
+        for (int j = 0; j < NOMBRECOLONNE; j++) {
+            if (((x - 20) >= j * 16 && (x - 20) <= (j + 1) * 16) &&
+                ((y - 20) >= i * 16 && (y - 20) < (i + 1) * 16)) {
+                *caseX = j;
+                *caseY = i;
+            } else {
+                a++;
+            }
+        }
+    }
+    if (a == NOMBRECOLONNE * NOMBRELIGNE) {
+        *caseX = 0;
+        *caseY = 0;
+    }
 }
-*/
 
 void initDonneesJeu(){
     //initialiserTabBouton();
@@ -306,10 +318,6 @@ void afficherChrono(double angle, ALLEGRO_COLOR couleur){
     al_draw_filled_triangle(XCHRONO-cos(angle)*2, YCHRONO +sin(angle)*2, XCHRONO +cos(angle)*2, YCHRONO - sin(angle)*2, XCHRONO - sin(angle)*25, YCHRONO - cos(angle)*25, couleur);
 }
 
-
-
-
-
 void afficherTempsRestant(float tempsRestant,float mois, ALLEGRO_FONT* policeTexte){
     al_draw_textf(policeTexte, al_map_rgb(0,0,0), XCHRONO + 60, YCHRONO - 20,0,"%.1f secondes", tempsRestant);
     al_draw_textf(policeTexte, al_map_rgb(0,0,0), XCHRONO + 60, YCHRONO ,0,"%.0f mois", mois);
@@ -371,15 +379,32 @@ void colorierCaseSouris(short xSouris, short ySouris){
             if(matriceCase[j][i].obstacle == 6){
                 matriceCase[j][i].couleurCase = al_map_rgb(40, 40, 40);
             }
+            if(matriceCase[j][i].obstacle == 1){
+                matriceCase[j][i].couleurCase = al_map_rgb(0, 0, 0);
+            }
         }
     }
 }
 
-void construireroute(short xSouris, short ySouris){
+void construireroute(short xSouris, short ySouris, short xcase , short ycase){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
-                matriceCase[j][i].obstacle = 6;
+                matriceCase[ycase][xcase].obstacle = 6;
+            }
+        }
+    }
+}
+
+void construireterrain(short xSouris, short ySouris, short xcase , short ycase){
+    for(short i = 0; i< NOMBRECOLONNE; i++){
+        for(short j = 0; j<NOMBRELIGNE; j++) {
+            if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
+                for(short k = 0; k< 3; k++) {
+                    for (short l = 0; l < 3; l++) {
+                        matriceCase[k + ycase][ l + xcase].obstacle = 1;
+                    }
+                }
             }
         }
     }
@@ -446,6 +471,7 @@ int main() {
     short usine = 0;
     short citerne = 0;
     short route = 0;
+    souris souris1;
     ALLEGRO_FONT  * policeTexte = initialiserPoliceTexte(taillePolice);
     //ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
     ALLEGRO_FONT  * policeTexte2 = initialiserPoliceTexte2(TAILLEPOLICEBOUTTONNORMALE);
@@ -456,6 +482,7 @@ int main() {
     bool fin = false;
     al_flip_display();
     do {
+        chercherCaseDeLaSourie(sourisState.x,sourisState.y,&souris1.Casex,&souris1.Casey, &souris1.interieurPlateau);
         al_wait_for_event(queue, &event);
         //ALLEGRO_KEYBOARD_STATE clavierState;
         //al_get_keyboard_state(&clavierState);
@@ -550,7 +577,10 @@ int main() {
                     }
                 }
                 if (etape == 4 && route) {
-                    construireroute(sourisState.x,sourisState.y);
+                    construireroute(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey);
+                }
+                if (etape == 4 && terrain) {
+                    construireterrain(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey);
                 }
             }
         }
