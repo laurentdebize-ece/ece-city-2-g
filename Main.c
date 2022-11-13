@@ -522,4 +522,5 @@ int main() {
     al_destroy_event_queue(temps);
     al_destroy_bitmap(imageMenu);
     return 0;
+
 }
