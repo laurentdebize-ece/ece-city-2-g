@@ -112,7 +112,7 @@ typedef struct Bouton{
 
 
 typedef struct Case{
-    short x1Case, x2Case, y1Case, y2Case, obstacle;
+    short x1Case, x2Case, y1Case, y2Case, obstacle,etat;
     ALLEGRO_COLOR couleurCase;
 }Case;
 
@@ -144,7 +144,26 @@ void initAllegro(){
     tabObstacle[CONSTRUCTION3] = al_load_bitmap("");
 }
  */
+void liresauv(char *nomFichier, Case tab[NOMBRELIGNE][NOMBRECOLONNE]) {
+    FILE *ifs = fopen(nomFichier, "r");
+    for (int i = 0; i < NOMBRELIGNE; ++i) {
+        for (int j = 0; j < NOMBRECOLONNE; ++j) {
+            fscanf(ifs, "%d", &tab[i][j].etat);
+        }
+    }
+    fclose(ifs);
+}
 
+void sauvegarde(char *nomFichier, Case tab[NOMBRELIGNE][NOMBRECOLONNE]) {
+    FILE *ifs = fopen(nomFichier, "w");
+    for (int i = 0; i < NOMBRELIGNE; ++i) {
+        for (int j = 0; j < NOMBRECOLONNE; ++j) {
+            fprintf(ifs, "%d ", (tab[i][j].etat));
+        }
+        fprintf(ifs, "\n");
+    }
+    fclose(ifs);
+}
 
 float largeurCaseGrille(short x1, short x2){
     return (x2 - x1)/NOMBRECOLONNE;
@@ -295,7 +314,7 @@ void afficherTempsRestant(float tempsRestant,float mois, ALLEGRO_FONT* policeTex
     al_draw_textf(policeTexte, al_map_rgb(0,0,0), XCHRONO + 60, YCHRONO - 20,0,"%.1f secondes", tempsRestant);
     al_draw_textf(policeTexte, al_map_rgb(0,0,0), XCHRONO + 60, YCHRONO ,0,"%.0f mois", mois);
     double angle = (tempsRestant)*(-0.42);
-    if(tempsRestant <= 3){
+    if(tempsRestant >= 12){
         afficherChrono(angle, al_map_rgb(190,0,0));
     }
     else{afficherChrono(angle, al_map_rgb(0,0,0));}
@@ -347,8 +366,20 @@ void colorierCaseSouris(short xSouris, short ySouris){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
-                //matriceCase[j][i].couleurCase = al_map_rgb(250, 0, 0);
-                al_draw_filled_rectangle(coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),al_map_rgb(40,40,40));
+                al_draw_filled_rectangle(coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),al_map_rgb(200,0,0));
+            }
+            if(matriceCase[j][i].obstacle == 6){
+                matriceCase[j][i].couleurCase = al_map_rgb(40, 40, 40);
+            }
+        }
+    }
+}
+
+void construireroute(short xSouris, short ySouris){
+    for(short i = 0; i< NOMBRECOLONNE; i++){
+        for(short j = 0; j<NOMBRELIGNE; j++) {
+            if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
+                matriceCase[j][i].obstacle = 6;
             }
         }
     }
@@ -375,6 +406,8 @@ void dessinerInfosJeu(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande,
     al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1CAPEAU, Y1CAPEAU,0,"cap eau : %.0f",capeau);
     al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1CAPELEC, Y1CAPELEC,0,"cap elec : %.0f",capelec);
 }
+
+
 
 int main() {
     initAllegro();
@@ -408,6 +441,11 @@ int main() {
     double tempsRestant = 0.0;
     short mois = 0;
     short niveau =0;
+    short destruction = 0;
+    short terrain = 0;
+    short usine = 0;
+    short citerne = 0;
+    short route = 0;
     ALLEGRO_FONT  * policeTexte = initialiserPoliceTexte(taillePolice);
     //ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
     ALLEGRO_FONT  * policeTexte2 = initialiserPoliceTexte2(TAILLEPOLICEBOUTTONNORMALE);
@@ -466,6 +504,54 @@ int main() {
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, X1NIVEAU2, Y1NIVEAU2, X2NIVEAU2, Y2NIVEAU2) && etape == 4 && boite) {
                     niveau = 2;
                 }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1DESTRUCTION, Y1DESTRUCTION, X2DESTRUCTION, Y2DESTRUCTION) && etape == 4 && boite) {
+                    terrain = 0,citerne = 0,usine = 0,route = 0;
+                    if(destruction){
+                        destruction = 0;
+                    }
+                    else{
+                        destruction +=1;
+                    }
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1TERRAIN, Y1TERRAIN, X2TERRAIN, Y2TERRAIN) && etape == 4 && boite) {
+                    destruction = 0,citerne = 0,usine = 0,route = 0;
+                    if(terrain){
+                        terrain = 0;
+                    }
+                    else{
+                        terrain +=1;
+                    }
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1CAPELEC, Y1CITERNE, X2CITERNE, Y2CITERNE) && etape == 4 && boite) {
+                    destruction = 0,terrain = 0,usine = 0,route = 0;
+                    if(citerne){
+                        citerne = 0;
+                    }
+                    else{
+                        citerne +=1;
+                    }
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1USINE, Y1USINE, X2USINE, Y2USINE) && etape == 4 && boite) {
+                    destruction = 0,terrain = 0,citerne = 0,route = 0;
+                    if(usine){
+                        usine = 0;
+                    }
+                    else{
+                        usine +=1;
+                    }
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1ROUTE, Y1ROUTE, X2ROUTE, Y2ROUTE) && etape == 4 && boite) {
+                    destruction = 0,terrain = 0,citerne = 0,usine = 0;
+                    if(route){
+                        route = 0;
+                    }
+                    else{
+                        route +=1;
+                    }
+                }
+                if (etape == 4 && route) {
+                    construireroute(sourisState.x,sourisState.y);
+                }
             }
         }
         if (etape == 0) {
@@ -489,13 +575,14 @@ int main() {
         }
         if (etape==4){
             if (event.type == ALLEGRO_EVENT_TIMER) {
-                if(tempsRestant == 15.0){
+                if(tempsRestant >= 15.0){
                     tempsRestant = 0.0;
+                    mois++;
+                    argent = argent +10*habitant;
                 }
                 else{
                     tempsRestant += 0.1;
                 }
-                mois = tempsRestant/15;
                 al_clear_to_color(al_map_rgb(255, 255, 255));
                 dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
                 al_get_mouse_state(&sourisState);
@@ -522,5 +609,4 @@ int main() {
     al_destroy_event_queue(temps);
     al_destroy_bitmap(imageMenu);
     return 0;
-
 }
