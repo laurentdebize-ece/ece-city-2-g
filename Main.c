@@ -381,6 +381,18 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
                 if (matriceCase[j][i].obstacle == 1) {
                     matriceCase[j][i].couleurCase = al_map_rgb(0, 0, 0);
                 }
+                if (matriceCase[j][i].obstacle == 2) {
+                    matriceCase[j][i].couleurCase = al_map_rgb(0, 100, 0);
+                }
+                if (matriceCase[j][i].obstacle == 3) {
+                    matriceCase[j][i].couleurCase = al_map_rgb(100, 0, 0);
+                }
+                if (matriceCase[j][i].obstacle == 4) {
+                    matriceCase[j][i].couleurCase = al_map_rgb(100, 200, 0);
+                }
+                if (matriceCase[j][i].obstacle == 5) {
+                    matriceCase[j][i].couleurCase = al_map_rgb(200, 0, 100);
+                }
                 if (matriceCase[j][i].obstacle == 6) {
                     matriceCase[j][i].couleurCase = al_map_rgb(40, 40, 40);
                 }
@@ -520,6 +532,16 @@ void destructionConstruction(short xSouris, short ySouris, short xcase , short y
                     matriceCase[ycase][xcase].etat = 0;
                     matriceCase[ycase][xcase].obstacle = 0;
                 }
+            }
+        }
+    }
+}
+
+void evolutionTerrain(){
+    for(short i = 0; i< NOMBRECOLONNE; i++) {
+        for (short j = 0; j < NOMBRELIGNE; j++) {
+            if(matriceCase[j][i].obstacle > 0 && matriceCase[j][i].obstacle <5){
+                matriceCase[j][i].obstacle ++;
             }
         }
     }
@@ -733,6 +755,7 @@ int main() {
                 if(tempsRestant >= 15.0){
                     tempsRestant = 0.0;
                     mois++;
+                    evolutionTerrain();
                     argent = argent +10*habitant;
                 }
                 else{
