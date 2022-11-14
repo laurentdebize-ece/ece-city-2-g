@@ -370,7 +370,8 @@ void dessinneGrille( int x1, int y1, int x2, int y2, int epaisseur, ALLEGRO_COLO
 
 
 
-void colorierCaseSouris(short xSouris, short ySouris,short niveau){
+void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* policeTexte){
+    dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0),policeTexte);
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
@@ -411,8 +412,10 @@ void construireroute(short xSouris, short ySouris, short xcase , short ycase){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
-                matriceCase[ycase][xcase].etat = 6;
-                matriceCase[ycase][xcase].obstacle = 6;
+                if(matriceCase[ycase][xcase].obstacle == 0) {
+                    matriceCase[ycase][xcase].etat = 6;
+                    matriceCase[ycase][xcase].obstacle = 6;
+                }
             }
         }
     }
@@ -422,10 +425,12 @@ void construireterrain(short xSouris, short ySouris, short xcase , short ycase){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
-                matriceCase[ycase][xcase].etat = 1;
                 for(short k = 0; k< 3; k++) {
                     for (short l = 0; l < 3; l++) {
-                        matriceCase[k + ycase][ l + xcase].obstacle = 1;
+                        if(matriceCase[k + ycase][ l + xcase].obstacle == 0) {
+                            matriceCase[k + ycase][l + xcase].obstacle = 1;
+                            matriceCase[ycase][xcase].etat = 1;
+                        }
                     }
                 }
             }
@@ -706,9 +711,9 @@ int main() {
                     tempsRestant += 0.1;
                 }
                 al_clear_to_color(al_map_rgb(255, 255, 255));
-                dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
+                //dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
                 al_get_mouse_state(&sourisState);
-                colorierCaseSouris(sourisState.x, sourisState.y,niveau);
+                colorierCaseSouris(sourisState.x, sourisState.y,niveau,policeTexte);
                 dessinnerTouteCasesColorie();
                 afficherTempsRestant(tempsRestant,mois, policeTexte);
                 dessinerBoutonOutil(policeTexte, policeTexte);
