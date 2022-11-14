@@ -422,12 +422,20 @@ void construireroute(short xSouris, short ySouris, short xcase , short ycase){
 }
 
 void construireterrain(short xSouris, short ySouris, short xcase , short ycase){
+    int caseVide = 0;
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
                 for(short k = 0; k< 3; k++) {
                     for (short l = 0; l < 3; l++) {
                         if(matriceCase[k + ycase][ l + xcase].obstacle == 0) {
+                            caseVide ++;
+                        }
+                    }
+                }
+                if(caseVide == 9) {
+                for(short k = 0; k< 3; k++) {
+                    for (short l = 0; l < 3; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 1;
                             matriceCase[ycase][xcase].etat = 1;
                         }
@@ -439,13 +447,23 @@ void construireterrain(short xSouris, short ySouris, short xcase , short ycase){
 }
 
 void construireciterne(short xSouris, short ySouris, short xcase , short ycase){
+    short caseVide = 0;
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
-                matriceCase[ycase][xcase].etat = 7;
                 for(short k = 0; k< 6; k++) {
                     for (short l = 0; l < 4; l++) {
-                        matriceCase[k + ycase][ l + xcase].obstacle = 7;
+                        if(matriceCase[k + ycase][ l + xcase].obstacle == 0) {
+                            caseVide ++;
+                        }
+                    }
+                }
+                if(caseVide == 24){
+                    for(short k = 0; k< 6; k++) {
+                        for (short l = 0; l < 4; l++) {
+                            matriceCase[k + ycase][l + xcase].obstacle = 7;
+                            matriceCase[ycase][xcase].etat = 1;
+                        }
                     }
                 }
             }
@@ -454,13 +472,23 @@ void construireciterne(short xSouris, short ySouris, short xcase , short ycase){
 }
 
 void construireusine(short xSouris, short ySouris, short xcase , short ycase){
+    short caseVide = 0;
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
-                matriceCase[ycase][xcase].etat = 8;
                 for(short k = 0; k< 6; k++) {
                     for (short l = 0; l < 4; l++) {
-                        matriceCase[k + ycase][ l + xcase].obstacle = 8;
+                        if(matriceCase[k + ycase][ l + xcase].obstacle == 0) {
+                            caseVide ++;
+                        }
+                    }
+                }
+                if(caseVide == 24){
+                    for(short k = 0; k< 6; k++) {
+                        for (short l = 0; l < 4; l++) {
+                            matriceCase[k + ycase][l + xcase].obstacle = 8;
+                            matriceCase[ycase][xcase].etat = 1;
+                        }
                     }
                 }
             }
