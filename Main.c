@@ -125,7 +125,7 @@ typedef struct souris{
 
 
 
-/*
+
 typedef  struct Maison {
     //ALLEGRO_BITMAP image_stade_batiment[6];
     int largeur,hauteur;
@@ -137,6 +137,8 @@ typedef  struct Maison {
     int stade;
     int viable;
 }Maison;
+
+ /*
 
 typedef  struct Maison_alimentee {
     int numero_maison;
@@ -321,6 +323,24 @@ void initDonneesJeu(){
 void dessinerArrierePlanMenu(ALLEGRO_BITMAP *imageMenu){
     al_draw_scaled_bitmap(imageMenu, 0, 0, 1280, 738, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 1);
 }
+void dessinerCabane(ALLEGRO_BITMAP *imageCabane,int x,int y){
+    al_draw_bitmap(imageCabane, x, y, 1);
+}
+void dessinerMaison(ALLEGRO_BITMAP *imageMaison,int x,int y){
+    al_draw_bitmap(imageMaison, x, y, 1);
+}
+void dessinerImmeuble(ALLEGRO_BITMAP *imageImmeuble,int x,int y){
+    al_draw_bitmap(imageImmeuble, x, y, 1);
+}
+void dessinerUsine(ALLEGRO_BITMAP *imageUsine,int x,int y){
+    al_draw_bitmap(imageUsine, x, y, 1);
+}
+void dessinerGratteCiel(ALLEGRO_BITMAP *imageGratteCiel,int x,int y){
+    al_draw_bitmap(imageGratteCiel, x, y, 1);
+}
+void dessinerCiterne(ALLEGRO_BITMAP *imageCiterne,int x,int y){
+    al_draw_bitmap(imageCiterne, x, y, 1);
+}
 
 void dessinerBouton(int x1,int y1,int x2,int y2,ALLEGRO_COLOR couleur, char* texte, ALLEGRO_FONT* policeTexte,short taillePolice ){
     al_draw_filled_rectangle(x1, y1, x2, y2,couleur);
@@ -477,7 +497,7 @@ void dessinneGrille( int x1, int y1, int x2, int y2, int epaisseur, ALLEGRO_COLO
 
 
 
-void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* policeTexte){
+void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* policeTexte,ALLEGRO_BITMAP* imageCiterne){
     dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0),policeTexte);
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
@@ -505,6 +525,9 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
                 }
                 if (matriceCase[j][i].obstacle == 7) {
                     matriceCase[j][i].couleurCase = al_map_rgb(40, 40, 40);
+                    if (matriceCase[j][i].etat == 7) {
+                        al_draw_bitmap(imageCiterne, i, j, 0);
+                    }
                 }
                 if (matriceCase[j][i].obstacle == 8) {
                     matriceCase[j][i].couleurCase = al_map_rgb(0, 200, 200);
@@ -542,7 +565,7 @@ int construireroute(short xSouris, short ySouris, short xcase , short ycase,int*
     return *argent;
 }
 
-int construireterrain(short xSouris, short ySouris, short xcase , short ycase,int* argent){
+int construireterrain(short xSouris, short ySouris, short xcase , short ycase,int* argent,Maison maison){
     int caseVide = 0;
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
@@ -569,7 +592,7 @@ int construireterrain(short xSouris, short ySouris, short xcase , short ycase,in
     return *argent;
 }
 
-int construireciterne(short xSouris, short ySouris, short xcase , short ycase,int* argent){
+int construireciterne(short xSouris, short ySouris, short xcase , short ycase,int* argent,ALLEGRO_BITMAP* imageCiterne ){
     short caseVide = 0;
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
@@ -586,7 +609,7 @@ int construireciterne(short xSouris, short ySouris, short xcase , short ycase,in
                     for(short k = 0; k< 6; k++) {
                         for (short l = 0; l < 4; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 7;
-                            matriceCase[ycase][xcase].etat = 1;
+                            matriceCase[ycase][xcase].etat = 7;
                         }
                     }
                 }
@@ -595,6 +618,7 @@ int construireciterne(short xSouris, short ySouris, short xcase , short ycase,in
     }
     return *argent;
 }
+
  int construireusine(short xSouris, short ySouris, short xcase , short ycase, int* argent){
     short caseVide = 0;
     for(short i = 0; i< NOMBRECOLONNE; i++){
@@ -612,7 +636,7 @@ int construireciterne(short xSouris, short ySouris, short xcase , short ycase,in
                     for(short k = 0; k< 6; k++) {
                         for (short l = 0; l < 4; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 8;
-                            matriceCase[ycase][xcase].etat = 1;
+                            matriceCase[ycase][xcase].etat = 8;
                         }
                     }
                 }
@@ -688,6 +712,12 @@ int main() {
     ALLEGRO_EVENT_QUEUE *temps = NULL;
     ALLEGRO_EVENT event;
     ALLEGRO_BITMAP *imageMenu = al_load_bitmap("../etape1.png");
+    ALLEGRO_BITMAP *imageCabane = al_load_bitmap("../CABANE.png");
+    ALLEGRO_BITMAP *imageMaison = al_load_bitmap("../house1.png");
+    ALLEGRO_BITMAP *imageImmeuble = al_load_bitmap("../immeuble.png");
+    ALLEGRO_BITMAP *imageUsine = al_load_bitmap("../Nuclear.png");
+    ALLEGRO_BITMAP *imageGratteCiel = al_load_bitmap("../Skyscraper.png");
+    ALLEGRO_BITMAP *imageCiterne = al_load_bitmap("../watertower.png");
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_TIMER *timer = NULL;
     queue = al_create_event_queue();
@@ -719,6 +749,7 @@ int main() {
     short usine = 0;
     short citerne = 0;
     short route = 0;
+    Maison maison;
     souris souris1;
     ALLEGRO_FONT  * policeTexte = initialiserPoliceTexte(taillePolice);
     //ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
@@ -830,10 +861,10 @@ int main() {
                     construireroute(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey,&argent);
                 }
                 if (etape == 4 && terrain) {
-                    construireterrain(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey,&argent);
+                    construireterrain(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey,&argent,maison);
                 }
                 if (etape == 4 && citerne) {
-                    construireciterne(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey,&argent);
+                    construireciterne(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey,&argent,imageCiterne);
                 }
                 if (etape == 4 && usine) {
                     construireusine(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey,&argent);
@@ -876,7 +907,7 @@ int main() {
                 al_clear_to_color(al_map_rgb(255, 255, 255));
                 //dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
                 al_get_mouse_state(&sourisState);
-                colorierCaseSouris(sourisState.x, sourisState.y,niveau,policeTexte);
+                colorierCaseSouris(sourisState.x, sourisState.y,niveau,policeTexte,imageCiterne);
                 dessinnerTouteCasesColorie();
                 afficherTempsRestant(tempsRestant,mois, policeTexte);
                 dessinerBoutonOutil(policeTexte, policeTexte);
@@ -898,5 +929,11 @@ int main() {
     al_destroy_timer(timer);
     al_destroy_event_queue(temps);
     al_destroy_bitmap(imageMenu);
+    al_destroy_bitmap(imageCabane);
+    al_destroy_bitmap(imageMaison);
+    al_destroy_bitmap(imageImmeuble);
+    al_destroy_bitmap(imageUsine);
+    al_destroy_bitmap(imageCiterne);
+    al_destroy_bitmap(imageGratteCiel);
     return 0;
 }
