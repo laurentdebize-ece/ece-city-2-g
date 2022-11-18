@@ -136,10 +136,34 @@ typedef  struct Maison {
     int elec_utilise;
     int stade;
     int viable;
+    int nbMaison
 }Maison;
 
-/*
+typedef  struct Usine {
+    int caseX, caseY;
+    int nbUsine;
+}Usine;
 
+typedef  struct Citerne {
+    int caseX, caseY;
+    int nbCiterne;
+}Citerne;
+
+
+typedef struct InfoGeneral{
+    int argent;
+    int habitant;
+    int capelec;
+    int capeau;
+    Maison maison [100];
+    Usine usine [10];
+    Citerne citerne [10];
+    int nombreMaison;
+    int nombreUsine;
+    int nombreCiterne;
+}InfoGeneral;
+
+/*
 typedef  struct Maison_alimentee {
    int numero_maison;
    int quantite;
@@ -437,11 +461,11 @@ void dessinerBoiteOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrand
     dessinerBouton(X1ROUTE, Y1ROUTE , X2ROUTE,Y2ROUTE , al_map_rgb(150,150,150), "route", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
 }
 
-void dessinerInfosJeu(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande,int argent , float habitant, float  capelec, float capeau ,float xcase, float ycase) {
-    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1ARGENT, Y1ARGENT,0,"argent : %d",argent );
-    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1HABITANT,Y1HABITANT,0,"habitant : %.0f",habitant);
-    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1CAPEAU, Y1CAPEAU,0,"cap eau : %.0f",capeau);
-    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1CAPELEC, Y1CAPELEC,0,"cap elec : %.0f",capelec);
+void dessinerInfosJeu(ALLEGRO_FONT* policeTexteGrande,float xcase, float ycase, InfoGeneral* infoGeneral) {
+    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1ARGENT, Y1ARGENT,0,"argent : %d", infoGeneral->argent);
+    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1HABITANT,Y1HABITANT,0,"habitant : %d",infoGeneral->habitant);
+    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1CAPEAU, Y1CAPEAU,0,"cap eau : %d",infoGeneral->capeau);
+    al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1CAPELEC, Y1CAPELEC,0,"cap elec : %d",infoGeneral->capelec);
     al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X2GRILLE + 20, Y1GRILLE ,0,"case : [%.0f] [%.0f] ",xcase +1,ycase+1);
 }
 
@@ -550,22 +574,21 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
     }
 }
 
-int construireroute(short xSouris, short ySouris, short xcase , short ycase,int* argent){
+void construireroute(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
-                if(matriceCase[ycase][xcase].obstacle == 0 && *argent >= 10) {
+                if(matriceCase[ycase][xcase].obstacle == 0 && infoGeneral->argent >= 10) {
                     matriceCase[ycase][xcase].etat = 6;
                     matriceCase[ycase][xcase].obstacle = 6;
-                    *argent-=10;
+                    infoGeneral->argent -=10;
                 }
             }
         }
     }
-    return *argent;
 }
 
-int construireterrain(short xSouris, short ySouris, short xcase , short ycase,int* argent,Maison maison){
+void construireterrain(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral){
     int caseVide = 0;
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
@@ -577,8 +600,11 @@ int construireterrain(short xSouris, short ySouris, short xcase , short ycase,in
                         }
                     }
                 }
-                if(caseVide == 9 && *argent >= 1000) {
-                    *argent -= 1000;
+                if(caseVide == 9 && infoGeneral->argent >= 1000) {
+                    infoGeneral->argent -= 1000;
+                    infoGeneral->nombreMaison +=1;
+                    infoGeneral->maison[infoGeneral->nombreMaison].caseX = xcase;
+                    infoGeneral->maison[infoGeneral->nombreMaison].caseY = ycase;
                     for(short k = 0; k< 3; k++) {
                         for (short l = 0; l < 3; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 1;
@@ -589,10 +615,9 @@ int construireterrain(short xSouris, short ySouris, short xcase , short ycase,in
             }
         }
     }
-    return *argent;
 }
 
-int construireciterne(short xSouris, short ySouris, short xcase , short ycase,int* argent,ALLEGRO_BITMAP* imageCiterne ){
+void construireciterne(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral,ALLEGRO_BITMAP* imageCiterne ){
     short caseVide = 0;
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
@@ -604,8 +629,11 @@ int construireciterne(short xSouris, short ySouris, short xcase , short ycase,in
                         }
                     }
                 }
-                if(caseVide == 24 && *argent >= 100000){
-                    *argent-=100000;
+                if(caseVide == 24 && infoGeneral->argent >= 100000){
+                    infoGeneral->argent -=100000;
+                    infoGeneral->nombreCiterne +=1;
+                    infoGeneral->citerne[infoGeneral->nombreCiterne].caseX = xcase;
+                    infoGeneral->citerne[infoGeneral->nombreCiterne].caseY = ycase;
                     for(short k = 0; k< 6; k++) {
                         for (short l = 0; l < 4; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 7;
@@ -616,10 +644,9 @@ int construireciterne(short xSouris, short ySouris, short xcase , short ycase,in
             }
         }
     }
-    return *argent;
 }
 
-int construireusine(short xSouris, short ySouris, short xcase , short ycase, int* argent){
+int construireusine(short xSouris, short ySouris, short xcase , short ycase, InfoGeneral* infoGeneral){
     short caseVide = 0;
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
@@ -631,8 +658,11 @@ int construireusine(short xSouris, short ySouris, short xcase , short ycase, int
                         }
                     }
                 }
-                if(caseVide == 24 && *argent >= 100000){
-                    *argent-=100000;
+                if(caseVide == 24 && infoGeneral->argent >= 100000){
+                    infoGeneral->argent -=100000;
+                    infoGeneral->nombreUsine +=1;
+                    infoGeneral->usine[infoGeneral->nombreUsine].caseX = xcase;
+                    infoGeneral->usine[infoGeneral->nombreUsine].caseY = ycase;
                     for(short k = 0; k< 6; k++) {
                         for (short l = 0; l < 4; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 8;
@@ -643,7 +673,6 @@ int construireusine(short xSouris, short ySouris, short xcase , short ycase, int
             }
         }
     }
-    return *argent;
 }
 
 void destructionConstruction(short xSouris, short ySouris, short xcase , short ycase){ //a finir plus tard
@@ -675,36 +704,30 @@ void destructionConstruction(short xSouris, short ySouris, short xcase , short y
     }
 }
 
-int evolutionTerrain(int* habitant){ //verifier si connexe a eau et elec et revoir nb habitants
+void evolutionTerrain(InfoGeneral* infoGeneral){
     for(short i = 0; i< NOMBRECOLONNE; i++) {
         for (short j = 0; j < NOMBRELIGNE; j++) {
             if(matriceCase[j][i].obstacle == 4 ){
                 matriceCase[j][i].obstacle = 5;
-                *habitant += 900;
             }
             if(matriceCase[j][i].obstacle == 3 ){
                 matriceCase[j][i].obstacle = 4;
-                *habitant += 50;
             }
             if(matriceCase[j][i].obstacle == 2 ){
                 matriceCase[j][i].obstacle = 3;
-                *habitant += 40;
             }
             if(matriceCase[j][i].obstacle == 1 ){
                 matriceCase[j][i].obstacle = 2;
-                *habitant += 10;
             }
         }
     }
-    return *habitant;
 }
+
+
 
 void dessinerBoutonOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
     dessinerBouton(X1OUTIL, Y1OUTIL , X2OUTIL ,Y2OUTIL , al_map_rgb(150,150,150), "OUTILS", policeTexteGrande, TAILLEPOLICEBOUTTONGRANDE);
 }
-
-
-
 
 int main() {
     initAllegro();
@@ -737,19 +760,25 @@ int main() {
     short etape = 0;
     short mode = 0;
     short boite = 0;
-    int argent = 500000;
-    int habitant = 0;
-    int capeau = 0;
-    int capelec = 0;
+    InfoGeneral infoGeneral;
+    infoGeneral.argent = 500000;
+    infoGeneral.habitant = 0;
+    infoGeneral.capeau = 0;
+    infoGeneral.capelec = 0;
+    infoGeneral.nombreMaison = 0;
+    infoGeneral.nombreCiterne = 0;
+    infoGeneral.nombreUsine = 0;
     double tempsRestant = 0.0;
     short mois = 0;
     short niveau = 0;
     short destruction = 0;
     short terrain = 0;
-    short usine = 0;
-    short citerne = 0;
+    short usinec = 0;
+    short citernec = 0;
     short route = 0;
     Maison maison;
+    Usine usine;
+    Citerne citerne;
     souris souris1;
     ALLEGRO_FONT *policeTexte = initialiserPoliceTexte(taillePolice);
     //ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
@@ -823,7 +852,7 @@ int main() {
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, X1DESTRUCTION, Y1DESTRUCTION, X2DESTRUCTION,
                                           Y2DESTRUCTION) && etape == 4 && boite) {
-                    terrain = 0, citerne = 0, usine = 0, route = 0;
+                    terrain = 0, citernec = 0, usinec = 0, route = 0;
                     if (destruction) {
                         destruction = 0;
                     } else {
@@ -832,7 +861,7 @@ int main() {
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, X1TERRAIN, Y1TERRAIN, X2TERRAIN, Y2TERRAIN) &&
                     etape == 4 && boite) {
-                    destruction = 0, citerne = 0, usine = 0, route = 0;
+                    destruction = 0, citernec = 0, usinec = 0, route = 0;
                     if (terrain) {
                         terrain = 0;
                     } else {
@@ -841,25 +870,25 @@ int main() {
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, X1CAPELEC, Y1CITERNE, X2CITERNE, Y2CITERNE) &&
                     etape == 4 && boite) {
-                    destruction = 0, terrain = 0, usine = 0, route = 0;
-                    if (citerne) {
-                        citerne = 0;
+                    destruction = 0, terrain = 0, usinec = 0, route = 0;
+                    if (citernec) {
+                        citernec = 0;
                     } else {
-                        citerne += 1;
+                        citernec += 1;
                     }
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, X1USINE, Y1USINE, X2USINE, Y2USINE) &&
                     etape == 4 && boite) {
-                    destruction = 0, terrain = 0, citerne = 0, route = 0;
-                    if (usine) {
-                        usine = 0;
+                    destruction = 0, terrain = 0, citernec = 0, route = 0;
+                    if (usinec) {
+                        usinec = 0;
                     } else {
-                        usine += 1;
+                        usinec += 1;
                     }
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, X1ROUTE, Y1ROUTE, X2ROUTE, Y2ROUTE) &&
                     etape == 4 && boite) {
-                    destruction = 0, terrain = 0, citerne = 0, usine = 0;
+                    destruction = 0, terrain = 0, citernec = 0, usinec = 0;
                     if (route) {
                         route = 0;
                     } else {
@@ -867,17 +896,17 @@ int main() {
                     }
                 }
                 if (etape == 4 && route) {
-                    construireroute(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, &argent);
+                    construireroute(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey,&infoGeneral);
                 }
                 if (etape == 4 && terrain) {
-                    construireterrain(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, &argent, maison);
+                    construireterrain(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, &infoGeneral);
                 }
-                if (etape == 4 && citerne) {
-                    construireciterne(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, &argent,
+                if (etape == 4 && citernec) {
+                    construireciterne(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, &infoGeneral,
                                       imageCiterne);
                 }
-                if (etape == 4 && usine) {
-                    construireusine(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, &argent);
+                if (etape == 4 && usinec) {
+                    construireusine(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, &infoGeneral);
                 }
                 if (etape == 4 && destruction) {
                     //destructionConstruction(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey);
@@ -909,8 +938,8 @@ int main() {
                 if (tempsRestant >= 15.0) {
                     tempsRestant = 0.0;
                     mois++;
-                    evolutionTerrain(&habitant);
-                    argent = argent + 10 * habitant;
+                    evolutionTerrain(&infoGeneral);
+                    infoGeneral.argent = infoGeneral.argent+ 10 * infoGeneral.habitant;
                 } else {
                     tempsRestant += 0.1;
                 }
@@ -921,8 +950,7 @@ int main() {
                 dessinnerTouteCasesColorie();
                 afficherTempsRestant(tempsRestant, mois, policeTexte);
                 dessinerBoutonOutil(policeTexte, policeTexte);
-                dessinerInfosJeu(policeTexte, policeTexte, argent, habitant, capelec, capeau, souris1.Casex,
-                                 souris1.Casey);
+                dessinerInfosJeu(policeTexte, souris1.Casex,souris1.Casey,&infoGeneral);
                 if (boite) {
                     dessinerBoiteOutil(policeTexte, policeTexte);
                 }
