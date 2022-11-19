@@ -529,33 +529,33 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
                 al_draw_filled_rectangle(coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),al_map_rgb(200,0,0));
             }
             if(niveau == 0){
-                if (matriceCase[j][i].etat == 1) {
-                    al_draw_bitmap(imageTerrain, 16*i+20, 16*j+20, 0);
+                if (matriceCase[j][i].obstacle == 1) {
+                    al_draw_bitmap(imageTerrain, 16*i+18, 16*j+18, 0);
                 }
-                if (matriceCase[j][i].etat == 2) {
-                    al_draw_bitmap(imageCabane, 16*i+20, 16*j+20, 0);
+                if (matriceCase[j][i].obstacle == 2) {
+                    al_draw_bitmap(imageCabane, 16*i+18, 16*j+18, 0);
                 }
-                if (matriceCase[j][i].etat == 3) {
-                   al_draw_bitmap(imageMaison, 16*i+20, 16*j+20, 0);
+                if (matriceCase[j][i].obstacle == 3) {
+                   al_draw_bitmap(imageMaison, 16*i+18, 16*j+18, 0);
                 }
                 if (matriceCase[j][i].obstacle == 4) {
                     //matriceCase[j][i].couleurCase = al_map_rgb(100, 200, 0);
-                    al_draw_bitmap(imageImmeuble, 16*i+20, 16*j+20, 0);
+                    al_draw_bitmap(imageImmeuble, 16*i+18, 16*j+18, 0);
                 }
                 if (matriceCase[j][i].obstacle == 5) {
                     //matriceCase[j][i].couleurCase = al_map_rgb(200, 0, 100);
-                    al_draw_bitmap(imageGratteCiel, 16*i+20, 16*j+20, 0);
+                    al_draw_bitmap(imageGratteCiel, 16*i+18, 16*j+18, 0);
                 }
                 if (matriceCase[j][i].obstacle == 6) {
                     matriceCase[j][i].couleurCase = al_map_rgb(40, 40, 40);
                 }
-                if (matriceCase[j][i].etat == 7) {
+                if (matriceCase[j][i].obstacle == 7) {
                     //matriceCase[j][i].couleurCase = al_map_rgb(40, 40, 40);
-                    al_draw_bitmap(imageCiterne, 16*i+20, 16*j+20, 0);
+                    al_draw_bitmap(imageCiterne, 16*i+18, 16*j+18, 0);
                 }
-                if (matriceCase[j][i].etat == 8) {
+                if (matriceCase[j][i].obstacle == 8) {
                     //matriceCase[j][i].couleurCase = al_map_rgb(0, 200, 200);
-                    al_draw_bitmap(imageUsine, 16*i+20, 16*j+20, 0);
+                    al_draw_bitmap(imageUsine, 16*i+18, 16*j+18, 0);
 
                 }
                 if (matriceCase[j][i].obstacle == 9) {
