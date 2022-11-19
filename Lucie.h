@@ -10,6 +10,11 @@
 #include <string.h>
 #include <stdbool.h>
 
+typedef struct flots
+{
+    int flotMax;
+    int flotactuel;
+}t_flots;
 //Définition de la file d'attente
 
 typedef struct maillon
@@ -30,6 +35,8 @@ struct Arc
 {
     int sommet; // numero de sommet d'un arc adjacent au sommet initial
     int poids;      //aussi la capacité maximale de chaque arc
+    int flot;       //flot de l'arc, commence à 0 puis augmente
+    int ecart;      // écart entre le flot actuel et la capacité maximale
     struct Arc* arc_suivant;
 };
 
