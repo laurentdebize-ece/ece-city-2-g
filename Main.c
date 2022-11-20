@@ -112,7 +112,7 @@ typedef struct Bouton{
 
 
 typedef struct Case{
-    short x1Case, x2Case, y1Case, y2Case, obstacle,etat;
+    short x1Case, x2Case, y1Case, y2Case, obstacle,etat,ordre;
     ALLEGRO_COLOR couleurCase;
 }Case;
 
@@ -205,8 +205,8 @@ void initAllegro(){
     al_init_image_addon();
     //al_install_keyboard();
     al_install_mouse();
-    //al_install_audio();
-    //al_init_acodec_addon();
+    al_install_audio();
+    al_init_acodec_addon();
 }
 /*
 void fichierTexte() {
@@ -254,7 +254,6 @@ void fichierTexte() {
 
     //return plateau;
 }
-
 
 void liresauv(Case tab[NOMBRELIGNE][NOMBRECOLONNE]) {
     FILE *ifs = fopen("../fichierTexte", "r");
@@ -309,6 +308,7 @@ void initialiserCasesGrille(){
             matriceCase[i][j].x2Case = coordonneX2CaseGrille(X1GRILLE, X2GRILLE, j+1);
             matriceCase[i][j].y2Case = coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, i+1);
             matriceCase[i][j].obstacle = 0;
+            matriceCase[i][j].ordre=0;
             matriceCase[i][j].couleurCase = al_map_rgba(0,0,0,0);
         }
     }
@@ -346,6 +346,9 @@ void initDonneesJeu(){
 
 void dessinerArrierePlanMenu(ALLEGRO_BITMAP *imageMenu){
     al_draw_scaled_bitmap(imageMenu, 0, 0, 1280, 738, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 1);
+}
+void dessinerTerrain(ALLEGRO_BITMAP *imageTerrain,int x,int y){
+    al_draw_bitmap(imageTerrain, x, y, 1);
 }
 void dessinerCabane(ALLEGRO_BITMAP *imageCabane,int x,int y){
     al_draw_bitmap(imageCabane, x, y, 1);
@@ -518,10 +521,7 @@ void dessinneGrille( int x1, int y1, int x2, int y2, int epaisseur, ALLEGRO_COLO
     }
 }
 
-
-
-
-void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* policeTexte,ALLEGRO_BITMAP* imageCiterne){
+void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* policeTexte,ALLEGRO_BITMAP* imageCiterne,ALLEGRO_BITMAP* imageCabane,ALLEGRO_BITMAP* imageMaison,ALLEGRO_BITMAP* imageImmeuble,ALLEGRO_BITMAP* imageGratteCiel, ALLEGRO_BITMAP* imageTerrain,ALLEGRO_BITMAP* imageUsine){
     dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0),policeTexte);
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
@@ -529,35 +529,38 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
                 al_draw_filled_rectangle(coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),al_map_rgb(200,0,0));
             }
             if(niveau == 0){
-                if (matriceCase[j][i].obstacle == 1) {
-                    matriceCase[j][i].couleurCase = al_map_rgb(0, 0, 0);
+                if (matriceCase[j][i].obstacle > 0 && matriceCase[j][i].obstacle != 6 && matriceCase[j][i].obstacle < 9) {
+                    matriceCase[j][i].couleurCase = al_map_rgba(0, 0, 0,70);
                 }
-                if (matriceCase[j][i].obstacle == 2) {
-                    matriceCase[j][i].couleurCase = al_map_rgb(0, 100, 0);
+                if (matriceCase[j][i].etat == 1) {
+                    al_draw_bitmap(imageTerrain, 16*i+20, 16*j+20, 0);
                 }
-                if (matriceCase[j][i].obstacle == 3) {
-                    matriceCase[j][i].couleurCase = al_map_rgb(100, 0, 0);
+                if (matriceCase[j][i].etat == 2) {
+                    al_draw_bitmap(imageCabane, 16*i+20, 16*j+20, 0);
+                }
+                if (matriceCase[j][i].etat == 3) {
+                   al_draw_bitmap(imageMaison, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].obstacle == 4) {
-                    matriceCase[j][i].couleurCase = al_map_rgb(100, 200, 0);
+                    //matriceCase[j][i].couleurCase = al_map_rgb(100, 200, 0);
+                    al_draw_bitmap(imageImmeuble, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].obstacle == 5) {
-                    matriceCase[j][i].couleurCase = al_map_rgb(200, 0, 100);
+                    //matriceCase[j][i].couleurCase = al_map_rgb(200, 0, 100);
+                    al_draw_bitmap(imageGratteCiel, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].obstacle == 6) {
                     matriceCase[j][i].couleurCase = al_map_rgb(40, 40, 40);
                 }
-                if (matriceCase[j][i].obstacle == 7) {
-                    matriceCase[j][i].couleurCase = al_map_rgb(40, 40, 40);
-                    if (matriceCase[j][i].etat == 7) {
-                        al_draw_bitmap(imageCiterne, i, j, 0);
-                    }
+
+                if (matriceCase[j][i].etat == 7) {
+                    al_draw_bitmap(imageCiterne, 16*i+20, 16*j+20, 0);
                 }
-                if (matriceCase[j][i].obstacle == 8) {
-                    matriceCase[j][i].couleurCase = al_map_rgb(0, 200, 200);
+                if (matriceCase[j][i].etat == 8) {
+                    al_draw_bitmap(imageUsine, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].obstacle == 9) {
-                    matriceCase[j][i].couleurCase = al_map_rgb(200, 100, 40);
+                    matriceCase[j][i].couleurCase = al_map_rgba(200, 100, 40,200);
                 }
             }
             if(niveau == 1){
@@ -578,7 +581,7 @@ void construireroute(short xSouris, short ySouris, short xcase , short ycase,Inf
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
-                if(matriceCase[ycase][xcase].obstacle == 0 && infoGeneral->argent >= 10) {
+                if((matriceCase[ycase][xcase].obstacle == 0 || matriceCase[ycase][xcase].obstacle == 9 )&& infoGeneral->argent >= 10) {
                     matriceCase[ycase][xcase].etat = 6;
                     matriceCase[ycase][xcase].obstacle = 6;
                     infoGeneral->argent -=10;
@@ -595,7 +598,7 @@ void construireterrain(short xSouris, short ySouris, short xcase , short ycase,I
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
                 for(short k = 0; k< 3; k++) {
                     for (short l = 0; l < 3; l++) {
-                        if(matriceCase[k + ycase][ l + xcase].obstacle == 0 && xcase<43 && ycase <34) {
+                        if((matriceCase[k + ycase][ l + xcase].obstacle == 0 || matriceCase[k + ycase][ l + xcase].obstacle == 9)&& xcase<43 && ycase <34) {
                             caseVide ++;
                         }
                     }
@@ -609,6 +612,7 @@ void construireterrain(short xSouris, short ySouris, short xcase , short ycase,I
                         for (short l = 0; l < 3; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 1;
                             matriceCase[ycase][xcase].etat = 1;
+                            matriceCase[ycase][xcase].ordre++;
                         }
                     }
                 }
@@ -624,7 +628,7 @@ void construireciterne(short xSouris, short ySouris, short xcase , short ycase,I
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
                 for(short k = 0; k< 6; k++) {
                     for (short l = 0; l < 4; l++) {
-                        if(matriceCase[k + ycase][ l + xcase].obstacle == 0 && xcase<42 && ycase <30) {
+                        if((matriceCase[k + ycase][ l + xcase].obstacle == 0 || matriceCase[k + ycase][ l + xcase].obstacle == 9) && xcase<42 && ycase <30) {
                             caseVide ++;
                         }
                     }
@@ -638,6 +642,7 @@ void construireciterne(short xSouris, short ySouris, short xcase , short ycase,I
                         for (short l = 0; l < 4; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 7;
                             matriceCase[ycase][xcase].etat = 7;
+                            matriceCase[ycase][xcase].ordre++;
                         }
                     }
                 }
@@ -653,7 +658,7 @@ int construireusine(short xSouris, short ySouris, short xcase , short ycase, Inf
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
                 for(short k = 0; k< 6; k++) {
                     for (short l = 0; l < 4; l++) {
-                        if(matriceCase[k + ycase][ l + xcase].obstacle == 0 && xcase<42 && ycase <30) {
+                        if((matriceCase[k + ycase][ l + xcase].obstacle == 0 || matriceCase[k + ycase][ l + xcase].obstacle == 9 )&& xcase<42 && ycase <30) {
                             caseVide ++;
                         }
                     }
@@ -667,6 +672,7 @@ int construireusine(short xSouris, short ySouris, short xcase , short ycase, Inf
                         for (short l = 0; l < 4; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 8;
                             matriceCase[ycase][xcase].etat = 8;
+                            matriceCase[ycase][xcase].ordre++;
                         }
                     }
                 }
@@ -675,15 +681,15 @@ int construireusine(short xSouris, short ySouris, short xcase , short ycase, Inf
     }
 }
 
-void destructionConstruction(short xSouris, short ySouris, short xcase , short ycase){ //a finir plus tard
+void destructionConstruction(short xSouris, short ySouris, short xcase , short ycase){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
-            if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1)) && matriceCase[xcase][ycase].etat != 0) {
+            if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
                 if(matriceCase[ycase][xcase].etat == 7 || matriceCase[ycase][xcase].etat == 8){
                     matriceCase[ycase][xcase].etat = 0;
                     for(short k = 0; k< 6; k++) {
                         for (short l = 0; l < 4; l++) {
-                            matriceCase[k + ycase][ l + xcase].obstacle = 0;
+                            matriceCase[k + ycase][ l + xcase].obstacle = 9;
                         }
                     }
                 }
@@ -691,13 +697,13 @@ void destructionConstruction(short xSouris, short ySouris, short xcase , short y
                     matriceCase[ycase][xcase].etat = 0;
                     for(short k = 0; k< 3; k++) {
                         for (short l = 0; l < 3; l++) {
-                            matriceCase[k + ycase][ l + xcase].obstacle = 0;
+                            matriceCase[k + ycase][ l + xcase].obstacle = 9;
                         }
                     }
                 }
                 if(matriceCase[ycase][xcase].etat == 6){
                     matriceCase[ycase][xcase].etat = 0;
-                    matriceCase[ycase][xcase].obstacle = 0;
+                    matriceCase[ycase][xcase].obstacle = 9;
                 }
             }
         }
@@ -737,10 +743,16 @@ int main() {
     ALLEGRO_BITMAP *imageMenu = al_load_bitmap("../etape1.png");
     ALLEGRO_BITMAP *imageCabane = al_load_bitmap("../CABANE.png");
     ALLEGRO_BITMAP *imageMaison = al_load_bitmap("../house1.png");
+    ALLEGRO_BITMAP *imageTerrain = al_load_bitmap("../grass.png");
     ALLEGRO_BITMAP *imageImmeuble = al_load_bitmap("../immeuble.png");
     ALLEGRO_BITMAP *imageUsine = al_load_bitmap("../Nuclear.png");
     ALLEGRO_BITMAP *imageGratteCiel = al_load_bitmap("../Skyscraper.png");
     ALLEGRO_BITMAP *imageCiterne = al_load_bitmap("../watertower.png");
+    ALLEGRO_SAMPLE *son = al_load_sample("The-Sims-Soundtrack_-Buy-Mode-1.ogg");
+    ALLEGRO_SAMPLE_INSTANCE *instanceSon = al_create_sample_instance(son);
+    al_set_sample_instance_playmode(instanceSon,ALLEGRO_PLAYMODE_LOOP);
+    al_attach_sample_instance_to_mixer(instanceSon,al_get_default_mixer());
+    al_set_audio_stream_gain(instanceSon, 0.5f);
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_TIMER *timer = NULL;
     queue = al_create_event_queue();
@@ -823,11 +835,13 @@ int main() {
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 500,
                                           SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 420) && etape == 3) {
                     etape = 4;
+                    al_play_sample_instance(instanceSon);
                     mode = 1;
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 300,
                                           SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 220) && etape == 1) {
                     etape = 4;
+                    al_play_sample_instance(instanceSon);
                     mode = 2;
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, X1OUTIL, Y1OUTIL, X2OUTIL, Y2OUTIL) &&
@@ -909,7 +923,7 @@ int main() {
                     construireusine(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, &infoGeneral);
                 }
                 if (etape == 4 && destruction) {
-                    //destructionConstruction(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey);
+                    destructionConstruction(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey);
                 }
             }
         }
@@ -946,7 +960,7 @@ int main() {
                 al_clear_to_color(al_map_rgb(255, 255, 255));
                 //dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
                 al_get_mouse_state(&sourisState);
-                colorierCaseSouris(sourisState.x, sourisState.y, niveau, policeTexte, imageCiterne);
+                colorierCaseSouris(sourisState.x, sourisState.y, niveau, policeTexte, imageCiterne,imageCabane,imageMaison,imageImmeuble,imageGratteCiel,imageTerrain,imageUsine);
                 dessinnerTouteCasesColorie();
                 afficherTempsRestant(tempsRestant, mois, policeTexte);
                 dessinerBoutonOutil(policeTexte, policeTexte);
@@ -967,11 +981,14 @@ int main() {
     al_destroy_timer(timer);
     al_destroy_event_queue(temps);
     al_destroy_bitmap(imageMenu);
+    al_destroy_bitmap(imageTerrain);
     al_destroy_bitmap(imageCabane);
     al_destroy_bitmap(imageMaison);
     al_destroy_bitmap(imageImmeuble);
     al_destroy_bitmap(imageUsine);
     al_destroy_bitmap(imageCiterne);
     al_destroy_bitmap(imageGratteCiel);
+    al_destroy_sample(son);
+    al_destroy_sample_instance(instanceSon);
     return 0;
 }
