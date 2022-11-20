@@ -748,6 +748,11 @@ int main() {
     ALLEGRO_BITMAP *imageUsine = al_load_bitmap("../Nuclear.png");
     ALLEGRO_BITMAP *imageGratteCiel = al_load_bitmap("../Skyscraper.png");
     ALLEGRO_BITMAP *imageCiterne = al_load_bitmap("../watertower.png");
+    ALLEGRO_SAMPLE *son = al_load_sample("The-Sims-Soundtrack_-Buy-Mode-1.ogg");
+    ALLEGRO_SAMPLE_INSTANCE *instanceSon = al_create_sample_instance(son);
+    al_set_sample_instance_playmode(instanceSon,ALLEGRO_PLAYMODE_LOOP);
+    al_attach_sample_instance_to_mixer(instanceSon,al_get_default_mixer());
+    al_set_audio_stream_gain(instanceSon, 0.5f);
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_TIMER *timer = NULL;
     queue = al_create_event_queue();
@@ -830,11 +835,13 @@ int main() {
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 500,
                                           SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 420) && etape == 3) {
                     etape = 4;
+                    al_play_sample_instance(instanceSon);
                     mode = 1;
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 300,
                                           SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 220) && etape == 1) {
                     etape = 4;
+                    al_play_sample_instance(instanceSon);
                     mode = 2;
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, X1OUTIL, Y1OUTIL, X2OUTIL, Y2OUTIL) &&
@@ -981,5 +988,7 @@ int main() {
     al_destroy_bitmap(imageUsine);
     al_destroy_bitmap(imageCiterne);
     al_destroy_bitmap(imageGratteCiel);
+    al_destroy_sample(son);
+    al_destroy_sample_instance(instanceSon);
     return 0;
 }
