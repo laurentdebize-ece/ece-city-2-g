@@ -153,7 +153,7 @@ typedef  struct Citerne {
 typedef struct InfoGeneral{
     int argent;
     int habitant;
-    int capelec;
+    int capelec; //capacité
     int capeau;
     Maison maison [100];
     Usine usine [10];
@@ -636,6 +636,7 @@ void construireciterne(short xSouris, short ySouris, short xcase , short ycase,I
                 if(caseVide == 24 && infoGeneral->argent >= 100000){
                     infoGeneral->argent -=100000;
                     infoGeneral->nombreCiterne +=1;
+                    infoGeneral->capeau +=5000;
                     infoGeneral->citerne[infoGeneral->nombreCiterne].caseX = xcase;
                     infoGeneral->citerne[infoGeneral->nombreCiterne].caseY = ycase;
                     for(short k = 0; k< 6; k++) {
@@ -666,6 +667,7 @@ int construireusine(short xSouris, short ySouris, short xcase , short ycase, Inf
                 if(caseVide == 24 && infoGeneral->argent >= 100000){
                     infoGeneral->argent -=100000;
                     infoGeneral->nombreUsine +=1;
+                    infoGeneral->capelec +=5000;
                     infoGeneral->usine[infoGeneral->nombreUsine].caseX = xcase;
                     infoGeneral->usine[infoGeneral->nombreUsine].caseY = ycase;
                     for(short k = 0; k< 6; k++) {
@@ -751,7 +753,7 @@ int main() {
     ALLEGRO_SAMPLE *son = al_load_sample("The-Sims-Soundtrack_-Buy-Mode-1.ogg");
     ALLEGRO_SAMPLE_INSTANCE *instanceSon = al_create_sample_instance(son);
     al_set_sample_instance_playmode(instanceSon,ALLEGRO_PLAYMODE_LOOP);
-    al_attach_sample_instance_to_mixer(instanceSon,al_get_default_mixer());
+    //al_attach_sample_instance_to_mixer(instanceSon,al_get_default_mixer());
     al_set_audio_stream_gain(instanceSon, 0.5f);
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_TIMER *timer = NULL;
