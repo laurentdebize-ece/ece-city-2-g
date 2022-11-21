@@ -539,7 +539,7 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
                     al_draw_bitmap(imageCabane, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].etat == 3) {
-                   al_draw_bitmap(imageMaison, 16*i+20, 16*j+20, 0);
+                    al_draw_bitmap(imageMaison, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].obstacle == 4) {
                     //matriceCase[j][i].couleurCase = al_map_rgb(100, 200, 0);
@@ -717,15 +717,27 @@ void evolutionTerrain(InfoGeneral* infoGeneral){
         for (short j = 0; j < NOMBRELIGNE; j++) {
             if(matriceCase[j][i].obstacle == 4 ){
                 matriceCase[j][i].obstacle = 5;
+                if(matriceCase[j][i].etat == 4 ) {
+                    matriceCase[j][i].etat = 5;
+                }
             }
             if(matriceCase[j][i].obstacle == 3 ){
                 matriceCase[j][i].obstacle = 4;
+                if(matriceCase[j][i].etat == 3 ){
+                    matriceCase[j][i].etat = 4;
+                }
             }
             if(matriceCase[j][i].obstacle == 2 ){
                 matriceCase[j][i].obstacle = 3;
+                if(matriceCase[j][i].etat == 2 ){
+                    matriceCase[j][i].etat = 3;
+                }
             }
             if(matriceCase[j][i].obstacle == 1 ){
                 matriceCase[j][i].obstacle = 2;
+                if(matriceCase[j][i].etat == 1 ){
+                    matriceCase[j][i].etat = 2;
+                }
             }
         }
     }
