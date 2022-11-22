@@ -71,6 +71,14 @@
 #define X2ROUTE 1200
 #define Y1ROUTE 500
 #define Y2ROUTE 540
+#define X1PAUSE 830
+#define X2PAUSE 970
+#define Y1PAUSE 560
+#define Y2PAUSE 600
+#define X1SAUVEGARDE 1050
+#define X2SAUVEGARDE 1200
+#define Y1SAUVEGARDE 560
+#define Y2SAUVEGARDE 600
 
 #define X1ARGENT 830
 #define X2ARGENT 970
@@ -462,6 +470,11 @@ void dessinerBoiteOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrand
     dessinerBouton(X1USINE, Y1USINE , X2USINE,Y2USINE , al_map_rgb(150,150,150), "usine", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1DESTRUCTION, Y1DESTRUCTION , X2DESTRUCTION ,Y2DESTRUCTION , al_map_rgb(150,150,150), "detruire", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1ROUTE, Y1ROUTE , X2ROUTE,Y2ROUTE , al_map_rgb(150,150,150), "route", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1PAUSE, Y1PAUSE , X2PAUSE,Y2PAUSE , al_map_rgb(250,150,150), "pause", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+}
+
+void dessinerSauvegarde(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
+    dessinerBouton(X1SAUVEGARDE, Y1SAUVEGARDE , X2SAUVEGARDE,Y2SAUVEGARDE , al_map_rgb(250,150,150), "sauvegarde", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
 }
 
 void dessinerInfosJeu(ALLEGRO_FONT* policeTexteGrande,float xcase, float ycase, InfoGeneral* infoGeneral) {
@@ -807,6 +820,7 @@ int main() {
     short usinec = 0;
     short citernec = 0;
     short route = 0;
+    short pause = 0;
     Maison maison;
     Usine usine;
     Citerne citerne;
@@ -944,6 +958,17 @@ int main() {
                 if (etape == 4 && destruction) {
                     destructionConstruction(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey);
                 }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1PAUSE, Y1PAUSE,X2PAUSE, Y2PAUSE) && etape == 4) {
+                    if(pause){
+                        pause = 0;
+                    }
+                    else{
+                        pause = 1;
+                    }
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1SAUVEGARDE, Y1SAUVEGARDE,X2SAUVEGARDE, Y2SAUVEGARDE) && pause == 1) {
+                    etape = 0;
+                }
             }
         }
         if (etape == 0) {
@@ -968,14 +993,6 @@ int main() {
         }
         if (etape == 4) {
             if (event.type == ALLEGRO_EVENT_TIMER) {
-                if (tempsRestant >= 15.0) {
-                    tempsRestant = 0.0;
-                    mois++;
-                    evolutionTerrain(&infoGeneral);
-                    infoGeneral.argent = infoGeneral.argent+ 10 * infoGeneral.habitant;
-                } else {
-                    tempsRestant += 0.1;
-                }
                 al_clear_to_color(al_map_rgb(255, 255, 255));
                 //dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
                 al_get_mouse_state(&sourisState);
@@ -984,6 +1001,17 @@ int main() {
                 afficherTempsRestant(tempsRestant, mois, policeTexte);
                 dessinerBoutonOutil(policeTexte, policeTexte);
                 dessinerInfosJeu(policeTexte, souris1.Casex,souris1.Casey,&infoGeneral);
+                if (pause){
+                    dessinerSauvegarde(policeTexte, policeTexte);
+                }
+                else if (tempsRestant >= 15.0) {
+                    tempsRestant = 0.0;
+                    mois++;
+                    evolutionTerrain(&infoGeneral);
+                    infoGeneral.argent = infoGeneral.argent+ 10 * infoGeneral.habitant;
+                } else {
+                    tempsRestant += 0.1;
+                }
                 if (boite) {
                     dessinerBoiteOutil(policeTexte, policeTexte);
                 }
