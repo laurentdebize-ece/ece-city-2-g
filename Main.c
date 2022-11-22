@@ -463,7 +463,7 @@ void afficherChrono(double angle, ALLEGRO_COLOR couleur){
 
 void dessinerBoiteOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
     dessinerBouton(X1NIVEAU0, Y1NIVEAU0 , X2NIVEAU0 ,Y2NIVEAU0 , al_map_rgb(150,150,150), "niveau 0", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
-    dessinerBouton(X1NIVEAU1, Y1NIVEAU1 , X2NIVEAU1 ,Y2NIVEAU1 , al_map_rgb(150,150,150), "iveau -1", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1NIVEAU1, Y1NIVEAU1 , X2NIVEAU1 ,Y2NIVEAU1 , al_map_rgb(150,150,150), "niveau -1", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1NIVEAU2, Y1NIVEAU2 , X2NIVEAU2 ,Y2NIVEAU2 , al_map_rgb(150,150,150), "niveau -2", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1TERRAIN, Y1TERRAIN , X2TERRAIN ,Y2TERRAIN , al_map_rgb(150,150,150), "terrain", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1CITERNE, Y1CITERNE , X2CITERNE ,Y2CITERNE , al_map_rgb(150,150,150), "citerne", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
@@ -796,10 +796,10 @@ int main() {
     al_register_event_source(queue, al_get_display_event_source(display));
     al_register_event_source(queue, al_get_mouse_event_source());
     al_register_event_source(queue, al_get_timer_event_source(timer));
-    //al_register_event_source(queue, al_get_keyboard_event_source());
+    al_register_event_source(queue, al_get_keyboard_event_source());
     al_clear_to_color(al_map_rgb(255, 255, 255));
     ALLEGRO_MOUSE_STATE sourisState;
-    //ALLEGRO_KEYBOARD_STATE clavierState;
+    ALLEGRO_KEYBOARD_STATE clavierState;
     short taillePolice = 14;
     short etape = 0;
     short mode = 0;
@@ -826,7 +826,6 @@ int main() {
     Citerne citerne;
     souris souris1;
     ALLEGRO_FONT *policeTexte = initialiserPoliceTexte(taillePolice);
-    //ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
     ALLEGRO_FONT *policeTexte2 = initialiserPoliceTexte2(TAILLEPOLICEBOUTTONNORMALE);
     ALLEGRO_FONT *policeTexteGrande = initialiserPoliceTexteGrande(TAILLEPOLICEBOUTTONGRANDE);
     ALLEGRO_FONT *policeTexteTitre = initialiserPoliceTexteTitre(TAILLEPOLICETITRE);
@@ -839,8 +838,8 @@ int main() {
     do {
         chercherCaseDeLaSourie(sourisState.x, sourisState.y, &souris1.Casex, &souris1.Casey, &souris1.interieurPlateau);
         al_wait_for_event(queue, &event);
-        //ALLEGRO_KEYBOARD_STATE clavierState;
-        //al_get_keyboard_state(&clavierState);
+        ALLEGRO_KEYBOARD_STATE clavierState;
+        al_get_keyboard_state(&clavierState);
         al_get_mouse_state(&sourisState);
 
         switch (event.type) {
@@ -968,6 +967,18 @@ int main() {
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, X1SAUVEGARDE, Y1SAUVEGARDE,X2SAUVEGARDE, Y2SAUVEGARDE) && pause == 1) {
                     etape = 0;
+                }
+            }
+            case ALLEGRO_EVENT_KEY_DOWN : {
+                switch (event.keyboard.keycode){
+                    case ALLEGRO_KEY_SPACE : {
+                        if (pause){
+                            pause = 0;
+                        }
+                        else{
+                            pause = 1;
+                        }
+                    }
                 }
             }
         }
