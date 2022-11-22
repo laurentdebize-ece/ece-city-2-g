@@ -203,7 +203,7 @@ void initAllegro(){
     al_init_font_addon();
     al_init_ttf_addon();
     al_init_image_addon();
-    //al_install_keyboard();
+    al_install_keyboard();
     al_install_mouse();
     al_install_audio();
     al_init_acodec_addon();
@@ -758,6 +758,7 @@ int main() {
     ALLEGRO_EVENT_QUEUE *queue = NULL;
     ALLEGRO_EVENT_QUEUE *temps = NULL;
     ALLEGRO_EVENT event;
+    al_reserve_samples(10);
     ALLEGRO_BITMAP *imageMenu = al_load_bitmap("../etape1.png");
     ALLEGRO_BITMAP *imageCabane = al_load_bitmap("../CABANE.png");
     ALLEGRO_BITMAP *imageMaison = al_load_bitmap("../house1.png");
@@ -766,10 +767,10 @@ int main() {
     ALLEGRO_BITMAP *imageUsine = al_load_bitmap("../Nuclear.png");
     ALLEGRO_BITMAP *imageGratteCiel = al_load_bitmap("../Skyscraper.png");
     ALLEGRO_BITMAP *imageCiterne = al_load_bitmap("../watertower.png");
-    ALLEGRO_SAMPLE *son = al_load_sample("The-Sims-Soundtrack_-Buy-Mode-1.ogg");
+    ALLEGRO_SAMPLE *son = al_load_sample("../The-Sims-Soundtrack_-Buy-Mode-1.ogg");
     ALLEGRO_SAMPLE_INSTANCE *instanceSon = al_create_sample_instance(son);
     al_set_sample_instance_playmode(instanceSon,ALLEGRO_PLAYMODE_LOOP);
-    //al_attach_sample_instance_to_mixer(instanceSon,al_get_default_mixer());
+    al_attach_sample_instance_to_mixer(instanceSon,al_get_default_mixer());
     al_set_audio_stream_gain(instanceSon, 0.5f);
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_TIMER *timer = NULL;
