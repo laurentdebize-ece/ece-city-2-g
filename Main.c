@@ -539,7 +539,7 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
-                al_draw_filled_rectangle(coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j +1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i +1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),al_map_rgb(200,0,0));
+                al_draw_filled_rectangle(coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),al_map_rgb(200,0,0));
             }
             if(niveau == 0){
                 if (matriceCase[j][i].obstacle > 0 && matriceCase[j][i].obstacle != 6 && matriceCase[j][i].obstacle < 9) {
@@ -611,7 +611,7 @@ void construireterrain(short xSouris, short ySouris, short xcase , short ycase,I
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
                 for(short k = 0; k< 3; k++) {
                     for (short l = 0; l < 3; l++) {
-                        if((matriceCase[k + ycase][l + xcase].obstacle == 0 || matriceCase[k + ycase][ l + xcase].obstacle == 9)&& xcase<43 && ycase <33) {
+                        if((matriceCase[k + ycase][ l + xcase].obstacle == 0 || matriceCase[k + ycase][ l + xcase].obstacle == 9)&& xcase<43 && ycase <33) {
                             caseVide ++;
                         }
                     }
@@ -871,7 +871,7 @@ int main() {
                     mode = 1;
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 300,
-                                          SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 220) && etape == 1) {
+                                          SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 220) && etape == 3) {
                     etape = 4;
                     al_play_sample_instance(instanceSon);
                     mode = 2;
@@ -977,6 +977,11 @@ int main() {
                         }
                         else{
                             pause = 1;
+                        }
+                    }
+                    case ALLEGRO_KEY_ENTER : {
+                        if (etape == 0){
+                            etape = 3;
                         }
                     }
                 }
