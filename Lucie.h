@@ -10,33 +10,12 @@
 #include <string.h>
 #include <stdbool.h>
 
-typedef struct Bouton{
-    short  x1Bouton, y1Bouton, x2Bouton, y2Bouton, taillePolice, action;
-    char nomBouton[20];
-    ALLEGRO_COLOR couleurBouton, couleurTexte, couleurPassageBouton;
-    struct Bouton * bouton;
-}Bouton;
 
-typedef struct Case{
-    short x1Case, x2Case, y1Case, y2Case, obstacle,etat,ordre;
-    ALLEGRO_COLOR couleurCase;
-}Case;
-
-typedef struct souris{
-    short Casex, Casey;
-    bool interieurPlateau;
-}souris;
-
-typedef  struct Usine {
-    int caseX, caseY;
-    int nbUsine;
-}Usine;
-
-typedef  struct Citerne {
-    int caseX, caseY;
-    int nbCiterne;
-}Citerne;
-
+typedef struct flots
+{
+    int flotMax;
+    int flotactuel;
+}t_flots;
 //Définition de la file d'attente
 
 typedef struct maillon
@@ -60,48 +39,10 @@ struct Arc
     int flot;       //flot de l'arc, commence à 0 puis augmente
     int ecart;      // écart entre le flot actuel et la capacité maximale
     struct Arc* arc_suivant;
-}Arc;
+};
 
 /* Alias de pointeur sur un Arc */
 typedef struct Arc* pArc;
-
-typedef  struct Maison {
-    //ALLEGRO_BITMAP image_stade_batiment[6];
-    int largeur,hauteur;
-    int date_creation;
-    int caseX, caseY;
-    int eau_utilise;
-    int elec_utilise;
-    int stade;
-    int viable;
-    int nbMaison;
-    struct Arc* arc;
-    bool citerne;
-    int capacite;
-    bool usine;
-    int NbrHabitant;
-    int valeur;
-    int distance;
-    int pred;
-    int couleur;
-}Maison;
-
-typedef struct InfoGeneral{
-    int argent;
-    int habitant;
-    int capelec;
-    int capeau;
-    Maison* maison;
-    Usine usine [10];
-    Citerne citerne [10];
-    int nombreMaison;
-    int nombreUsine;
-    int nombreCiterne;
-    int ordre;
-    int** matrice;
-    char* tabSommet;
-    t_attente* attente;
-}InfoGeneral;
 
 /* Structure d'un sommet*/
 struct Sommet
@@ -111,10 +52,11 @@ struct Sommet
     int capacite;
     bool habitation;
     int NbrHabitant;
+    int valeur;
     int distance;
     int pred;
     int couleur;
-}Sommet;
+};
 
 /* Alias de pointeur sur un Sommet */
 typedef struct Sommet* pSommet;
@@ -127,18 +69,33 @@ typedef struct graphe
     char* tabSommet;
     pSommet* pSommet;
     t_attente* attente;
-}Graphe;
+} Graphe;
 
 t_attente* ajoutListe(t_attente*attente, int numero);
 t_attente *removeListe(t_attente*attente);
-Graphe* CreerGraphe(int ordre);// creer le graphe
-Graphe * lire_graphe(char * nomFichier);
-pSommet* CreerArete(pSommet* sommet,int s1,int s2,int poids);// Ajouter l'arete entre les sommets s1 et s2 du graphe
-void afficher_successeurs(pSommet * sommet, int num);/* affichage des successeurs du sommet num*/
-void graphe_afficher(Graphe* graphe);/*affichage du graphe avec les successeurs de chaque sommet */
 
-void afficher_successeurs(pSommet * sommet, int num)/* affichage des successeurs du sommet num*/
+// creer le graphe
+Graphe* CreerGraphe(int ordre);
+
+/* La construction du reseau peut se faire a partir d'un fichier dont le nom est passe en parametre
+Le fichier contient : ordre, taille,orientation (0 ou 1)et liste des arcs */
+Graphe * lire_graphe(char * nomFichier);
+
+// Ajouter l'arete entre les sommets s1 et s2 du graphe
+pSommet* CreerArete(pSommet* sommet,int s1,int s2,int poids);
+
+/* affichage des successeurs du sommet num*/
+void afficher_successeurs(pSommet * sommet, int num);
+
+/*affichage du graphe avec les successeurs de chaque sommet */
+void graphe_afficher(Graphe* graphe);
+
+
+/* affichage des successeurs du sommet num*/
+void afficher_successeurs(pSommet * sommet, int num)
 {
+    //char lettreSommet;
+    //lettreSommet=switchSommet(num);
     printf("Sommet %d :\n",num);
 
     if(sommet[num]->arc == NULL){
@@ -153,7 +110,8 @@ void afficher_successeurs(pSommet * sommet, int num)/* affichage des successeurs
     }
 }
 
-pSommet* CreerArete(pSommet* sommet,int s1,int s2,int poids)  // Ajouter l'arete entre les sommets s1 et s2 du graphe
+// Ajouter l'arete entre les sommets s1 et s2 du graphe
+pSommet* CreerArete(pSommet* sommet,int s1,int s2,int poids)
 {
     if(sommet[s1]->arc==NULL)
     {
@@ -191,7 +149,8 @@ pSommet* CreerArete(pSommet* sommet,int s1,int s2,int poids)  // Ajouter l'arete
     }
 }
 
-Graphe* CreerGraphe(int ordre)// creer le graphe
+// creer le graphe
+Graphe* CreerGraphe(int ordre)
 {
     Graphe * Newgraphe=(Graphe*)malloc(sizeof(Graphe));
     Newgraphe->pSommet = (pSommet*)malloc(ordre*sizeof(pSommet));
@@ -199,12 +158,14 @@ Graphe* CreerGraphe(int ordre)// creer le graphe
     for(int i=0; i<ordre; i++)
     {
         Newgraphe->pSommet[i]=(pSommet)malloc(sizeof(struct Sommet));
+        Newgraphe->pSommet[i]->valeur=i;
         Newgraphe->pSommet[i]->arc=NULL;
         Newgraphe->pSommet[i]->pred=-1;
     }
     Newgraphe->ordre=ordre;
     return Newgraphe;
 }
+
 
 Graphe * lire_graphe(char * nomFichier) //récupérer les infos du fichier
 {
@@ -217,6 +178,7 @@ Graphe * lire_graphe(char * nomFichier) //récupérer les infos du fichier
         exit(-1);}
 
     fscanf(ifs,"%d\n",&ordre);  //on récupère l'odre du graphe
+    char* tabSommet=malloc(ordre*sizeof(char)); //tableau avec le nom des sommets
 
     int** matrice=(int**)malloc(ordre*sizeof(int*));    //déclaration, allocation d'une matrice 2D
 
@@ -224,9 +186,14 @@ Graphe * lire_graphe(char * nomFichier) //récupérer les infos du fichier
     {
         matrice[i] = malloc(ordre * sizeof (int));
     }
-    graphe=CreerGraphe(ordre); // creer le graphe vide d'ordre sommets
+    graphe= CreerGraphe(ordre); // creer le graphe vide d'ordre sommets
     graphe->matrice=matrice;    //la matrice est enregistrée dans le graphe
+    graphe->tabSommet=tabSommet;    //le tableau est enregistré dans le graphe
 
+    for(i=0;i<ordre;i++)    //récupérer le nom des sommets
+    {
+        fscanf(ifs,"%c ",&tabSommet[i]);
+    }
     for(i=0;i<ordre;i++)        //récupérer la matrice d'adjacence
     {
         for(j=0;j<ordre;j++)
@@ -286,7 +253,6 @@ Graphe* initDistributionEau(Graphe* graphe,int numero)  //Partie initialisation 
     graphe->pSommet[source]->capacite=5000;
     graphe->pSommet[source]->couleur=1; //la source est marquée
     graphe->pSommet[source]->distance=0;
-    graphe->pSommet[source]->pred=-1;    //tous les predecesseurs sont à -1: il n'y en a pas
 
     for(int i=1;i<graphe->ordre;i++)
     {
@@ -294,7 +260,6 @@ Graphe* initDistributionEau(Graphe* graphe,int numero)  //Partie initialisation 
         graphe->pSommet[i]->chateau=0;
         graphe->pSommet[i]->NbrHabitant=2000;
         graphe->pSommet[i]->couleur=0;//On note tous les sommets comme non repérés
-        graphe->pSommet[i]->pred=-1;    //tous les predecesseurs sont à -1: il n'y en a pas
         graphe->pSommet[i]->distance=500;
     }
     return graphe;
@@ -421,6 +386,7 @@ Graphe* DistributionEau(Graphe* graphe)
         }
     }
 }
+
 Graphe* AlimentationEnEau(Graphe* graphe)
 {
     graphe=initDistributionEau(graphe,0);   //démarrer bfs
@@ -429,14 +395,16 @@ Graphe* AlimentationEnEau(Graphe* graphe)
     graphe=DistributionEau(graphe);
     return graphe;
 }
-Graphe *initDistributionElec(Graphe *graphe,int source)
+
+Graphe *initDistributionElec(Graphe *graphe,int numero)
 {
+    int source=0;
     t_maillon* maille = malloc(sizeof(t_maillon));//initialisation à null
 
     graphe->attente = malloc(sizeof(t_attente));  //création de la file
     graphe->attente->tete=graphe->attente->fin=NULL;
 
-    maille->numero=source;      //enfiler le premier maillon avec le numéro de la source
+    maille->numero=numero;      //enfiler le premier maillon avec le numéro de la source
     graphe->attente->tete= graphe->attente->fin=maille;     //On le fait que la premiere fois
     graphe->attente->tete->suivant=graphe->attente->fin;        //quand la file est vide
     graphe->attente->fin->suivant=NULL;
@@ -494,7 +462,7 @@ Graphe *PlusCourtCheminDistributionElec(Graphe *graphe)
     }
     return graphe;
 }
-Graphe *afficheDistributionElec(Graphe *graphe)
+void afficheDistributionElec(Graphe *graphe)
 {
     int i,j;
     for(i=0;i<graphe->ordre;i++)    //pour chaque sommet
@@ -508,7 +476,6 @@ Graphe *afficheDistributionElec(Graphe *graphe)
         }
         printf(" distance : %d",graphe->pSommet[i]->distance);
     }
-    return graphe;
 }
 Graphe *DistributionElec(Graphe *graphe)
 {
@@ -560,6 +527,7 @@ Graphe *DistributionElec(Graphe *graphe)
     }
     return graphe;
 }
+
 Graphe* AlimentationElectricite(Graphe* graphe)
 {
     graphe=initDistributionElec(graphe,0);
@@ -568,6 +536,144 @@ Graphe* AlimentationElectricite(Graphe* graphe)
     graphe=DistributionElec(graphe);
 
     return graphe;
+}
+
+int rechercheRoute(int i, int j, int tab[45][35], int distance,bool retour)
+{
+
+    tab[i][j]=0;
+    if ((distance>2)&&(((tab[i][j + 1] ==2)||(tab[i][j-1]==2)||(tab[i-1][j]==2)||(tab[i+1][j] ==2))||(((tab[i-1][j] ==1)&&(tab[i-2][j] == 2))||((tab[i+1][j] ==1)&&(tab[i+2][j] == 2))||((tab[i][j-1] ==1)&&(tab[i][j-2] == 2))||((tab[i][j+1] ==1)&&(tab[i][j+2] == 2)))))
+    {
+        printf("\nnouveau sommet");
+        retour=true;
+        return distance;
+    }
+    if ((distance>2)&&(((tab[i][j + 1] ==3)||(tab[i][j-1]==3)||(tab[i-1][j]==3)||(tab[i+1][j] ==3))||(((tab[i-1][j] ==1)&&(tab[i-2][j] == 3))||((tab[i+1][j] ==1)&&(tab[i+2][j] == 3))||((tab[i][j-1] ==1)&&(tab[i][j-2] == 3))||((tab[i][j+1] ==1)&&(tab[i][j+2] == 3)))))
+    {
+        printf("\nnouveau sommet");
+        retour=true;
+
+        return distance;
+    }
+    if ((distance>2)&&(((tab[i][j + 1] ==4)||(tab[i][j-1]==4)||(tab[i-1][j]==4)||(tab[i+1][j] ==4))||(((tab[i-1][j] ==1)&&(tab[i-2][j] == 4))||((tab[i+1][j] ==1)&&(tab[i+2][j] == 4))||((tab[i][j-1] ==1)&&(tab[i][j-2] == 4))||((tab[i][j+1] ==1)&&(tab[i][j+2] == 4)))))
+    {
+        printf("\nnouveau sommet");
+        retour=true;
+
+        return distance;
+    }
+    if ((distance>2)&&(((tab[i][j + 1] ==5)||(tab[i][j-1]==5)||(tab[i-1][j]==5)||(tab[i+1][j] ==5))||(((tab[i-1][j] ==1)&&(tab[i-2][j] == 2))||((tab[i+1][j] ==1)&&(tab[i+2][j] == 2))||((tab[i][j-1] ==1)&&(tab[i][j-2] == 2))||((tab[i][j+1] ==1)&&(tab[i][j+2] == 2)))))
+    {
+        printf("\nnouveau sommet");
+        retour=true;
+
+        return distance;
+    }
+    if (tab[i - 1][j] == 6)
+    {
+        distance++;
+        distance = rechercheRoute(i-1, j, tab,distance,retour);
+        printf("\nsalut : distance %d:",distance);
+    }
+    if (tab[i + 1][j] == 6)
+    {
+        distance++;
+        distance = rechercheRoute(i+1, j, tab,distance,retour);
+        printf("\nsalut : distance %d:",distance);
+    }
+    if (tab[i][j - 1] == 6)
+    {
+        distance++;
+        distance = rechercheRoute(i, j-1, tab,distance,retour);
+        printf("\nsalut : distance %d:",distance);
+    }
+    if (tab[i][j + 1] == 6)
+    {
+        distance++;
+        distance = rechercheRoute(i, j+1, tab,distance,retour);
+        printf("\nsalut : distance %d:",distance);
+    }
+    printf("\ndistance %d:",distance);
+    distance--;
+    return distance;
+}
+
+int conversionTXTgraphe(int tab[45][35]) {
+    FILE *ifs = fopen("Test_matrice.txt","r");
+
+    int distance=0;
+    int ordre=0;
+    int numSommet=0;
+    int i,j,k,l;
+    bool retour =false;
+
+    if(ifs==NULL)
+        printf("erreur");
+
+    for ( i = 0; i < 35; i++) //récupérer les données de la matrice
+    {
+        for ( j = 0; j < 45; j++)
+        {
+            fscanf(ifs,"%d ",&tab[i][j]);
+            printf("%d ", tab[i][j]);
+            if(tab[i][j]==1)
+            {ordre++;}
+        }
+        printf("\n");
+    }
+    fclose(ifs);
+
+    for ( i = 0; i < 35; i++) //récupérer les données de la matrice
+    {
+        //i=8;
+        for ( j = 0; j < 45; j++)
+        {
+            //j=6;
+            if(tab[i][j]==1)
+            {
+                switch (tab[i][j+1])
+                {
+                    case 0: //rien
+                        break;
+                    case 1: //terrain  3*3
+                        break;
+                    case 2: //cabane 10H  3*3
+                        /*for (k = 0; k < 3; k++)
+                        {
+                            for (l = 0; l < 3; l++)
+                            {
+                                distance=rechercheRoute(i+k,j+l,tab,distance);
+                                distance=0;
+                            }
+                        }*/
+                        break;
+                    case 3: //maison 40H  3*3
+                        break;
+                    case 4: //immeuble 50H  3*3
+                        break;
+                    case 5: //gratte ciel 900H 3*3
+                        break;
+                    case 6: //route 4*6
+                        break;
+                    case 7: //citerne 4*6
+                        for (k = 0; k < 6; k++)
+                        {
+                            for (l = 0; l < 4; l++)
+                            {
+                                distance=rechercheRoute(i+k,j+l,tab,distance,retour);
+                                distance=0;
+                            }
+                        }
+                        break;
+                    case 8: //centrale elec
+                        break;
+                    case 9:
+                        break;
+                }
+            }
+        }
+    }
+    return distance;
 }
 
 #endif //ECE_CITY_2_G_LUCIE_H

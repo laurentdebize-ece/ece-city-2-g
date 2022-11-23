@@ -10,6 +10,7 @@
 #include <allegro5/allegro_acodec.h>
 #include <math.h>
 
+
 #define LARGEURFENETRE 1250
 #define HAUTEURFENETRE 660
 #define SCREEN_WIDTH 1280
@@ -118,21 +119,151 @@ typedef struct Bouton{
     struct Bouton * bouton;
 }Bouton;
 
-
 typedef struct Case{
-    short x1Case, x2Case, y1Case, y2Case, obstacle,etat,ordre;
+    short x1Case, x2Case, y1Case, y2Case, obstacle,etat,batiment;
     ALLEGRO_COLOR couleurCase;
 }Case;
 
 Case matriceCase[NOMBRELIGNE][NOMBRECOLONNE];
 
+//#include "Lucie.h"
+
+
+int rechercheRoute(int i, int j, int tab[45][35], int distance)
+{
+    tab[i][j]=0;
+    if ((distance>2)&&(((tab[i][j + 1] ==2)||(tab[i][j-1]==2)||(tab[i-1][j]==2)||(tab[i+1][j] ==2))||(((tab[i-1][j] ==1)&&(tab[i-2][j] == 2))||((tab[i+1][j] ==1)&&(tab[i+2][j] == 2))||((tab[i][j-1] ==1)&&(tab[i][j-2] == 2))||((tab[i][j+1] ==1)&&(tab[i][j+2] == 2)))))
+    {
+        printf("\nnouveau sommet");
+        return distance;
+    }
+    if ((distance>2)&&(((tab[i][j + 1] ==3)||(tab[i][j-1]==3)||(tab[i-1][j]==3)||(tab[i+1][j] ==3))||(((tab[i-1][j] ==1)&&(tab[i-2][j] == 3))||((tab[i+1][j] ==1)&&(tab[i+2][j] == 3))||((tab[i][j-1] ==1)&&(tab[i][j-2] == 3))||((tab[i][j+1] ==1)&&(tab[i][j+2] == 3)))))
+    {
+        printf("\nnouveau sommet");
+        return distance;
+    }
+    if ((distance>2)&&(((tab[i][j + 1] ==4)||(tab[i][j-1]==4)||(tab[i-1][j]==4)||(tab[i+1][j] ==4))||(((tab[i-1][j] ==1)&&(tab[i-2][j] == 4))||((tab[i+1][j] ==1)&&(tab[i+2][j] == 4))||((tab[i][j-1] ==1)&&(tab[i][j-2] == 4))||((tab[i][j+1] ==1)&&(tab[i][j+2] == 4)))))
+    {
+        printf("\nnouveau sommet");
+        return distance;
+    }
+    if ((distance>2)&&(((tab[i][j + 1] ==5)||(tab[i][j-1]==5)||(tab[i-1][j]==5)||(tab[i+1][j] ==5))||(((tab[i-1][j] ==1)&&(tab[i-2][j] == 2))||((tab[i+1][j] ==1)&&(tab[i+2][j] == 2))||((tab[i][j-1] ==1)&&(tab[i][j-2] == 2))||((tab[i][j+1] ==1)&&(tab[i][j+2] == 2)))))
+    {
+        printf("\nnouveau sommet");
+        return distance;
+    }
+    if (tab[i - 1][j] == 6)
+    {
+        distance++;
+        distance = rechercheRoute(i-1, j, tab,distance);
+        printf("\nsalut : distance %d:",distance);
+    }
+    if (tab[i + 1][j] == 6)
+    {
+        distance++;
+        distance = rechercheRoute(i+1, j, tab,distance);
+        printf("\nsalut : distance %d:",distance);
+    }
+    if (tab[i][j - 1] == 6)
+    {
+        distance++;
+        distance = rechercheRoute(i, j-1, tab,distance);
+        printf("\nsalut : distance %d:",distance);
+    }
+    if (tab[i][j + 1] == 6)
+    {
+        distance++;
+        distance = rechercheRoute(i, j+1, tab,distance);
+        printf("\nsalut : distance %d:",distance);
+    }
+    printf("\ndistance %d:",distance);
+    distance--;
+    return distance;
+}
+
+
+int conversionTXTgraphe() {
+    FILE *ifs = fopen("Test_matrice.txt","r");
+
+    int tab[45][35];
+    int distance=0;
+    int numSommet=0;
+    int i,j,k,l;
+
+    if(ifs==NULL)
+        printf("erreur");
+
+    for ( i = 0; i < 35; i++) //récupérer les données de la matrice
+    {
+        for ( j = 0; j < 45; j++)
+        {
+            //fscanf(ifs,"%d ",&tab[i][j]);
+            //if(tab[i][j]==1)
+            //{ordre++;}
+            tab[i][j]=matriceCase[i][j].batiment;
+            printf("%d ", tab[i][j]);
+        }
+        printf("\n");
+    }
+    fclose(ifs);
+
+    for ( i = 0; i < 35; i++) //récupérer les données de la matrice
+    {
+        //i=8;
+        for ( j = 0; j < 45; j++)
+        {
+            //j=6;
+            if(tab[i][j]==1)
+            {
+                switch (tab[i][j+1])
+                {
+                    case 0: //rien
+                        break;
+                    case 1: //terrain  3*3
+                        break;
+                    case 2: //cabane 10H  3*3
+                        /*for (k = 0; k < 3; k++)
+                        {
+                            for (l = 0; l < 3; l++)
+                            {
+                                distance=rechercheRoute(i+k,j+l,tab,distance);
+                                distance=0;
+                            }
+                        }*/
+                        break;
+                    case 3: //maison 40H  3*3
+                        break;
+                    case 4: //immeuble 50H  3*3
+                        break;
+                    case 5: //gratte ciel 900H 3*3
+                        break;
+                    case 6: //route 4*6
+                        break;
+                    case 7: //citerne 4*6
+                        for (k = 0; k < 6; k++)
+                        {
+                            for (l = 0; l < 4; l++)
+                            {
+                                distance=rechercheRoute(i+k,j+l,tab,distance);
+                                distance=0;
+                            }
+                        }
+                        break;
+                    case 8: //centrale elec
+                        break;
+                    case 9:
+                        break;
+                }
+            }
+        }
+    }
+    return distance;
+}
+
 typedef struct souris{
     short Casex, Casey;
     bool interieurPlateau;
 }souris;
-
-
-
 
 typedef  struct Maison {
     //ALLEGRO_BITMAP image_stade_batiment[6];
@@ -308,6 +439,7 @@ float coordonneY1CaseGrille( short y1,  short y2,short noLigne) {
 float coordonneY2CaseGrille( short y1,  short y2,short noLigne) {
     return y1 + hauteurCaseGrille(y1,y2) * (noLigne);
 }
+
 void initialiserCasesGrille(){
     for(short i = 0; i<NOMBRELIGNE; i++){
         for(short j = 0; j < NOMBRECOLONNE; j++){
@@ -316,7 +448,7 @@ void initialiserCasesGrille(){
             matriceCase[i][j].x2Case = coordonneX2CaseGrille(X1GRILLE, X2GRILLE, j+1);
             matriceCase[i][j].y2Case = coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, i+1);
             matriceCase[i][j].obstacle = 0;
-            matriceCase[i][j].ordre=0;
+            matriceCase[i][j].batiment=0;
             matriceCase[i][j].couleurCase = al_map_rgba(0,0,0,0);
         }
     }
@@ -552,7 +684,7 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
                     al_draw_bitmap(imageCabane, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].etat == 3) {
-                    al_draw_bitmap(imageMaison, 16*i+20, 16*j+20, 0);
+                   al_draw_bitmap(imageMaison, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].etat == 4) {
                     //matriceCase[j][i].couleurCase = al_map_rgb(100, 200, 0);
@@ -571,6 +703,7 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
                 }
                 if (matriceCase[j][i].etat == 8) {
                     al_draw_bitmap(imageUsine, 16*i+20, 16*j+20, 0);
+
                 }
                 if (matriceCase[j][i].obstacle == 9) {
                     matriceCase[j][i].couleurCase = al_map_rgba(200, 100, 40,200);
@@ -597,6 +730,7 @@ void construireroute(short xSouris, short ySouris, short xcase , short ycase,Inf
                 if((matriceCase[ycase][xcase].obstacle == 0 || matriceCase[ycase][xcase].obstacle == 9 )&& infoGeneral->argent >= 10) {
                     matriceCase[ycase][xcase].etat = 6;
                     matriceCase[ycase][xcase].obstacle = 6;
+                    matriceCase[ycase][xcase].batiment=6;
                     infoGeneral->argent -=10;
                 }
             }
@@ -606,6 +740,7 @@ void construireroute(short xSouris, short ySouris, short xcase , short ycase,Inf
 
 void construireterrain(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral){
     int caseVide = 0;
+    //infoGeneral->maison=(Maison*)malloc(infoGeneral->nombreMaison*sizeof(Maison));
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
@@ -625,9 +760,10 @@ void construireterrain(short xSouris, short ySouris, short xcase , short ycase,I
                         for (short l = 0; l < 3; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 1;
                             matriceCase[ycase][xcase].etat = 1;
-                            matriceCase[ycase][xcase].ordre++;
+                            matriceCase[k+ycase][l+xcase].batiment=1;
                         }
                     }
+                    matriceCase[ycase][xcase].batiment=11;
                 }
             }
         }
@@ -656,13 +792,17 @@ void construireciterne(short xSouris, short ySouris, short xcase , short ycase,I
                         for (short l = 0; l < 4; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 7;
                             matriceCase[ycase][xcase].etat = 7;
-                            matriceCase[ycase][xcase].ordre++;
+                            matriceCase[k+ycase][l+xcase].batiment=7;
                         }
                     }
+                    matriceCase[ycase][xcase].batiment=11;
                 }
             }
         }
     }
+    int distance;
+    //int tab[45][35];
+    distance= conversionTXTgraphe();
 }
 
 int construireusine(short xSouris, short ySouris, short xcase , short ycase, InfoGeneral* infoGeneral){
@@ -687,9 +827,10 @@ int construireusine(short xSouris, short ySouris, short xcase , short ycase, Inf
                         for (short l = 0; l < 4; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 8;
                             matriceCase[ycase][xcase].etat = 8;
-                            matriceCase[ycase][xcase].ordre++;
+                            matriceCase[k+ycase][l+xcase].batiment=8;
                         }
                     }
+                    matriceCase[ycase][xcase].batiment=11;
                 }
             }
         }
@@ -705,6 +846,7 @@ void destructionConstruction(short xSouris, short ySouris, short xcase , short y
                     for(short k = 0; k< 6; k++) {
                         for (short l = 0; l < 4; l++) {
                             matriceCase[k + ycase][ l + xcase].obstacle = 9;
+                            matriceCase[ycase][xcase].batiment = 0;
                         }
                     }
                 }
@@ -713,12 +855,14 @@ void destructionConstruction(short xSouris, short ySouris, short xcase , short y
                     for(short k = 0; k< 3; k++) {
                         for (short l = 0; l < 3; l++) {
                             matriceCase[k + ycase][ l + xcase].obstacle = 9;
+                            matriceCase[ycase][xcase].batiment = 0;
                         }
                     }
                 }
                 if(matriceCase[ycase][xcase].etat == 6){
                     matriceCase[ycase][xcase].etat = 0;
                     matriceCase[ycase][xcase].obstacle = 9;
+                    matriceCase[ycase][xcase].batiment = 0;
                 }
             }
         }
@@ -728,11 +872,17 @@ void destructionConstruction(short xSouris, short ySouris, short xcase , short y
 void evolutionTerrain(InfoGeneral* infoGeneral){
     for(short i = 0; i< NOMBRECOLONNE; i++) {
         for (short j = 0; j < NOMBRELIGNE; j++) {
-            if(matriceCase[j][i].obstacle == 4 ){
+            if(matriceCase[j][i].obstacle == 4 )
+            {
                 matriceCase[j][i].obstacle = 5;
-                if(matriceCase[j][i].etat == 4 ) {
+                if(matriceCase[j][i].etat == 4 )
+                {
                     matriceCase[j][i].etat = 5;
                     infoGeneral->habitant+=900;
+                }
+                if(matriceCase[j][i].batiment == 4 )
+                {
+                    matriceCase[j][i].batiment = 5;
                 }
             }
             if(matriceCase[j][i].obstacle == 3 ){
@@ -741,6 +891,10 @@ void evolutionTerrain(InfoGeneral* infoGeneral){
                     matriceCase[j][i].etat = 4;
                     infoGeneral->habitant+=50;
                 }
+                if(matriceCase[j][i].batiment == 3 )
+                {
+                    matriceCase[j][i].batiment = 4;
+                }
             }
             if(matriceCase[j][i].obstacle == 2 ){
                 matriceCase[j][i].obstacle = 3;
@@ -748,12 +902,20 @@ void evolutionTerrain(InfoGeneral* infoGeneral){
                     matriceCase[j][i].etat = 3;
                     infoGeneral->habitant+=40;
                 }
+                if(matriceCase[j][i].batiment == 2 )
+                {
+                    matriceCase[j][i].batiment = 3;
+                }
             }
             if(matriceCase[j][i].obstacle == 1 ){
                 matriceCase[j][i].obstacle = 2;
                 if(matriceCase[j][i].etat == 1 ){
                     matriceCase[j][i].etat = 2;
                     infoGeneral->habitant+=10;
+                }
+                if(matriceCase[j][i].batiment == 1 )
+                {
+                    matriceCase[j][i].batiment = 2;
                 }
             }
         }
@@ -767,6 +929,15 @@ void dessinerBoutonOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGran
 }
 
 int main() {
+    /*
+    int distance;
+    int tab[45][35];
+    distance= conversionTXTgraphe(tab);
+     */
+    //Graphe * g=lire_graphe("tp6.txt");
+    //graphe_afficher(g);    // afficher le graphe
+    //g= AlimentationEnEau(g);
+
     initAllegro();
     ALLEGRO_EVENT_QUEUE *queue = NULL;
     ALLEGRO_EVENT_QUEUE *temps = NULL;
@@ -1051,7 +1222,5 @@ int main() {
     al_destroy_bitmap(imageUsine);
     al_destroy_bitmap(imageCiterne);
     al_destroy_bitmap(imageGratteCiel);
-    al_destroy_sample(son);
-    al_destroy_sample_instance(instanceSon);
     return 0;
 }
