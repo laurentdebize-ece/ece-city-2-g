@@ -71,6 +71,14 @@
 #define X2ROUTE 1200
 #define Y1ROUTE 500
 #define Y2ROUTE 540
+#define X1PAUSE 830
+#define X2PAUSE 970
+#define Y1PAUSE 560
+#define Y2PAUSE 600
+#define X1SAUVEGARDE 1050
+#define X2SAUVEGARDE 1200
+#define Y1SAUVEGARDE 560
+#define Y2SAUVEGARDE 600
 
 #define X1ARGENT 830
 #define X2ARGENT 970
@@ -203,7 +211,7 @@ void initAllegro(){
     al_init_font_addon();
     al_init_ttf_addon();
     al_init_image_addon();
-    //al_install_keyboard();
+    al_install_keyboard();
     al_install_mouse();
     al_install_audio();
     al_init_acodec_addon();
@@ -455,13 +463,18 @@ void afficherChrono(double angle, ALLEGRO_COLOR couleur){
 
 void dessinerBoiteOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
     dessinerBouton(X1NIVEAU0, Y1NIVEAU0 , X2NIVEAU0 ,Y2NIVEAU0 , al_map_rgb(150,150,150), "niveau 0", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
-    dessinerBouton(X1NIVEAU1, Y1NIVEAU1 , X2NIVEAU1 ,Y2NIVEAU1 , al_map_rgb(150,150,150), "iveau -1", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1NIVEAU1, Y1NIVEAU1 , X2NIVEAU1 ,Y2NIVEAU1 , al_map_rgb(150,150,150), "niveau -1", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1NIVEAU2, Y1NIVEAU2 , X2NIVEAU2 ,Y2NIVEAU2 , al_map_rgb(150,150,150), "niveau -2", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1TERRAIN, Y1TERRAIN , X2TERRAIN ,Y2TERRAIN , al_map_rgb(150,150,150), "terrain", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1CITERNE, Y1CITERNE , X2CITERNE ,Y2CITERNE , al_map_rgb(150,150,150), "citerne", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1USINE, Y1USINE , X2USINE,Y2USINE , al_map_rgb(150,150,150), "usine", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1DESTRUCTION, Y1DESTRUCTION , X2DESTRUCTION ,Y2DESTRUCTION , al_map_rgb(150,150,150), "detruire", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
     dessinerBouton(X1ROUTE, Y1ROUTE , X2ROUTE,Y2ROUTE , al_map_rgb(150,150,150), "route", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+    dessinerBouton(X1PAUSE, Y1PAUSE , X2PAUSE,Y2PAUSE , al_map_rgb(250,150,150), "pause", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
+}
+
+void dessinerSauvegarde(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
+    dessinerBouton(X1SAUVEGARDE, Y1SAUVEGARDE , X2SAUVEGARDE,Y2SAUVEGARDE , al_map_rgb(250,150,150), "sauvegarde", policeTexte, TAILLEPOLICEBOUTTONNORMALE);
 }
 
 void dessinerInfosJeu(ALLEGRO_FONT* policeTexteGrande,float xcase, float ycase, InfoGeneral* infoGeneral) {
@@ -541,11 +554,11 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
                 if (matriceCase[j][i].etat == 3) {
                     al_draw_bitmap(imageMaison, 16*i+20, 16*j+20, 0);
                 }
-                if (matriceCase[j][i].obstacle == 4) {
+                if (matriceCase[j][i].etat == 4) {
                     //matriceCase[j][i].couleurCase = al_map_rgb(100, 200, 0);
                     al_draw_bitmap(imageImmeuble, 16*i+20, 16*j+20, 0);
                 }
-                if (matriceCase[j][i].obstacle == 5) {
+                if (matriceCase[j][i].etat == 5) {
                     //matriceCase[j][i].couleurCase = al_map_rgb(200, 0, 100);
                     al_draw_bitmap(imageGratteCiel, 16*i+20, 16*j+20, 0);
                 }
@@ -598,7 +611,7 @@ void construireterrain(short xSouris, short ySouris, short xcase , short ycase,I
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
                 for(short k = 0; k< 3; k++) {
                     for (short l = 0; l < 3; l++) {
-                        if((matriceCase[k + ycase][ l + xcase].obstacle == 0 || matriceCase[k + ycase][ l + xcase].obstacle == 9)&& xcase<43 && ycase <34) {
+                        if((matriceCase[k + ycase][ l + xcase].obstacle == 0 || matriceCase[k + ycase][ l + xcase].obstacle == 9)&& xcase<43 && ycase <33) {
                             caseVide ++;
                         }
                     }
@@ -719,24 +732,28 @@ void evolutionTerrain(InfoGeneral* infoGeneral){
                 matriceCase[j][i].obstacle = 5;
                 if(matriceCase[j][i].etat == 4 ) {
                     matriceCase[j][i].etat = 5;
+                    infoGeneral->habitant+=900;
                 }
             }
             if(matriceCase[j][i].obstacle == 3 ){
                 matriceCase[j][i].obstacle = 4;
                 if(matriceCase[j][i].etat == 3 ){
                     matriceCase[j][i].etat = 4;
+                    infoGeneral->habitant+=50;
                 }
             }
             if(matriceCase[j][i].obstacle == 2 ){
                 matriceCase[j][i].obstacle = 3;
                 if(matriceCase[j][i].etat == 2 ){
                     matriceCase[j][i].etat = 3;
+                    infoGeneral->habitant+=40;
                 }
             }
             if(matriceCase[j][i].obstacle == 1 ){
                 matriceCase[j][i].obstacle = 2;
                 if(matriceCase[j][i].etat == 1 ){
                     matriceCase[j][i].etat = 2;
+                    infoGeneral->habitant+=10;
                 }
             }
         }
@@ -754,6 +771,7 @@ int main() {
     ALLEGRO_EVENT_QUEUE *queue = NULL;
     ALLEGRO_EVENT_QUEUE *temps = NULL;
     ALLEGRO_EVENT event;
+    al_reserve_samples(10);
     ALLEGRO_BITMAP *imageMenu = al_load_bitmap("../etape1.png");
     ALLEGRO_BITMAP *imageCabane = al_load_bitmap("../CABANE.png");
     ALLEGRO_BITMAP *imageMaison = al_load_bitmap("../house1.png");
@@ -762,10 +780,10 @@ int main() {
     ALLEGRO_BITMAP *imageUsine = al_load_bitmap("../Nuclear.png");
     ALLEGRO_BITMAP *imageGratteCiel = al_load_bitmap("../Skyscraper.png");
     ALLEGRO_BITMAP *imageCiterne = al_load_bitmap("../watertower.png");
-    ALLEGRO_SAMPLE *son = al_load_sample("The-Sims-Soundtrack_-Buy-Mode-1.ogg");
+    ALLEGRO_SAMPLE *son = al_load_sample("../The-Sims-Soundtrack_-Buy-Mode-1.ogg");
     ALLEGRO_SAMPLE_INSTANCE *instanceSon = al_create_sample_instance(son);
     al_set_sample_instance_playmode(instanceSon,ALLEGRO_PLAYMODE_LOOP);
-    //al_attach_sample_instance_to_mixer(instanceSon,al_get_default_mixer());
+    al_attach_sample_instance_to_mixer(instanceSon,al_get_default_mixer());
     al_set_audio_stream_gain(instanceSon, 0.5f);
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_TIMER *timer = NULL;
@@ -778,10 +796,10 @@ int main() {
     al_register_event_source(queue, al_get_display_event_source(display));
     al_register_event_source(queue, al_get_mouse_event_source());
     al_register_event_source(queue, al_get_timer_event_source(timer));
-    //al_register_event_source(queue, al_get_keyboard_event_source());
+    al_register_event_source(queue, al_get_keyboard_event_source());
     al_clear_to_color(al_map_rgb(255, 255, 255));
     ALLEGRO_MOUSE_STATE sourisState;
-    //ALLEGRO_KEYBOARD_STATE clavierState;
+    ALLEGRO_KEYBOARD_STATE clavierState;
     short taillePolice = 14;
     short etape = 0;
     short mode = 0;
@@ -802,12 +820,12 @@ int main() {
     short usinec = 0;
     short citernec = 0;
     short route = 0;
+    short pause = 0;
     Maison maison;
     Usine usine;
     Citerne citerne;
     souris souris1;
     ALLEGRO_FONT *policeTexte = initialiserPoliceTexte(taillePolice);
-    //ALLEGRO_FONT * policeTexte50 = initialiserPoliceTexte(50);
     ALLEGRO_FONT *policeTexte2 = initialiserPoliceTexte2(TAILLEPOLICEBOUTTONNORMALE);
     ALLEGRO_FONT *policeTexteGrande = initialiserPoliceTexteGrande(TAILLEPOLICEBOUTTONGRANDE);
     ALLEGRO_FONT *policeTexteTitre = initialiserPoliceTexteTitre(TAILLEPOLICETITRE);
@@ -820,8 +838,8 @@ int main() {
     do {
         chercherCaseDeLaSourie(sourisState.x, sourisState.y, &souris1.Casex, &souris1.Casey, &souris1.interieurPlateau);
         al_wait_for_event(queue, &event);
-        //ALLEGRO_KEYBOARD_STATE clavierState;
-        //al_get_keyboard_state(&clavierState);
+        ALLEGRO_KEYBOARD_STATE clavierState;
+        al_get_keyboard_state(&clavierState);
         al_get_mouse_state(&sourisState);
 
         switch (event.type) {
@@ -853,7 +871,7 @@ int main() {
                     mode = 1;
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 12, SCREEN_HEIGHT - 300,
-                                          SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 220) && etape == 1) {
+                                          SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 220) && etape == 3) {
                     etape = 4;
                     al_play_sample_instance(instanceSon);
                     mode = 2;
@@ -939,6 +957,34 @@ int main() {
                 if (etape == 4 && destruction) {
                     destructionConstruction(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey);
                 }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1PAUSE, Y1PAUSE,X2PAUSE, Y2PAUSE) && etape == 4) {
+                    if(pause){
+                        pause = 0;
+                    }
+                    else{
+                        pause = 1;
+                    }
+                }
+                if (checkSourisDansBouton(sourisState.x, sourisState.y, X1SAUVEGARDE, Y1SAUVEGARDE,X2SAUVEGARDE, Y2SAUVEGARDE) && pause == 1) {
+                    etape = 0;
+                }
+            }
+            case ALLEGRO_EVENT_KEY_DOWN : {
+                switch (event.keyboard.keycode){
+                    case ALLEGRO_KEY_SPACE : {
+                        if (pause){
+                            pause = 0;
+                        }
+                        else{
+                            pause = 1;
+                        }
+                    }
+                    case ALLEGRO_KEY_ENTER : {
+                        if (etape == 0){
+                            etape = 3;
+                        }
+                    }
+                }
             }
         }
         if (etape == 0) {
@@ -963,14 +1009,6 @@ int main() {
         }
         if (etape == 4) {
             if (event.type == ALLEGRO_EVENT_TIMER) {
-                if (tempsRestant >= 15.0) {
-                    tempsRestant = 0.0;
-                    mois++;
-                    evolutionTerrain(&infoGeneral);
-                    infoGeneral.argent = infoGeneral.argent+ 10 * infoGeneral.habitant;
-                } else {
-                    tempsRestant += 0.1;
-                }
                 al_clear_to_color(al_map_rgb(255, 255, 255));
                 //dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
                 al_get_mouse_state(&sourisState);
@@ -979,6 +1017,17 @@ int main() {
                 afficherTempsRestant(tempsRestant, mois, policeTexte);
                 dessinerBoutonOutil(policeTexte, policeTexte);
                 dessinerInfosJeu(policeTexte, souris1.Casex,souris1.Casey,&infoGeneral);
+                if (pause){
+                    dessinerSauvegarde(policeTexte, policeTexte);
+                }
+                else if (tempsRestant >= 15.0) {
+                    tempsRestant = 0.0;
+                    mois++;
+                    evolutionTerrain(&infoGeneral);
+                    infoGeneral.argent = infoGeneral.argent+ 10 * infoGeneral.habitant;
+                } else {
+                    tempsRestant += 0.1;
+                }
                 if (boite) {
                     dessinerBoiteOutil(policeTexte, policeTexte);
                 }

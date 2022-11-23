@@ -60,7 +60,7 @@ struct Arc
     int flot;       //flot de l'arc, commence à 0 puis augmente
     int ecart;      // écart entre le flot actuel et la capacité maximale
     struct Arc* arc_suivant;
-};
+}Arc;
 
 /* Alias de pointeur sur un Arc */
 typedef struct Arc* pArc;
@@ -114,7 +114,7 @@ struct Sommet
     int distance;
     int pred;
     int couleur;
-};
+}Sommet;
 
 /* Alias de pointeur sur un Sommet */
 typedef struct Sommet* pSommet;
