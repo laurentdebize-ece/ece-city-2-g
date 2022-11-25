@@ -107,6 +107,58 @@
 #define CONSTRUCTION1 3
 #define CONSTRUCTION2 3
 #define CONSTRUCTION3 3
+//Définition de la file d'attente
+
+typedef struct maillon
+{
+    int numero;
+    int distanceS;
+    struct maillon* suivant;
+}t_maillon;
+
+typedef struct attente
+{
+    t_maillon* tete;
+    t_maillon* fin;
+}t_attente;
+
+/* Structure d'un arc*/
+struct Arc
+{
+    int sommet; // numero de sommet d'un arc adjacent au sommet initial
+    int poids;      //aussi la capacité maximale de chaque arc
+    int flot;       //flot de l'arc, commence à 0 puis augmente
+    int ecart;      // écart entre le flot actuel et la capacité maximale
+    struct Arc* arc_suivant;
+};
+
+/* Alias de pointeur sur un Arc */
+typedef struct Arc* pArc;
+
+/* Structure d'un sommet*/
+struct Sommet
+{
+    struct Arc* arc;
+    bool chateau;
+    int capacite;
+    bool habitation;
+    int NbrHabitant;
+    int valeur;
+    int distance;
+    int pred;
+    int couleur;
+};
+
+/* Alias de pointeur sur un Sommet */
+typedef struct Sommet* pSommet;
+
+typedef struct graphe
+{
+    int ordre;
+    int** matrice;
+    pSommet* pSommet;
+    t_attente* attente;
+} Graphe;
 
 typedef struct Bouton{
     short  x1Bouton, y1Bouton, x2Bouton, y2Bouton, taillePolice, action;
@@ -116,12 +168,12 @@ typedef struct Bouton{
 }Bouton;
 
 typedef struct Case{
-    short x1Case, x2Case, y1Case, y2Case, obstacle,etat,batiment,numConstruction;
+    short x1Case, x2Case, y1Case, y2Case, obstacle,etat;
+    int batiment,numConstruction;
     ALLEGRO_COLOR couleurCase;
 }Case;
 
 Case matriceCase[NOMBRELIGNE][NOMBRECOLONNE];
-
 
 typedef struct souris{
     short Casex, Casey;
@@ -153,7 +205,6 @@ typedef  struct Citerne {
     int capeau;
 }Citerne;
 
-
 typedef struct InfoGeneral{
     int argent;
     int habitant;
@@ -163,97 +214,264 @@ typedef struct InfoGeneral{
     int nombreMaison;
     int nombreUsine;
     int nombreCiterne;
+    int nbConstruction;
     int capeau;
     int capelec;
+    int distance;
+    Graphe* graphe;
 }InfoGeneral;
 
-int rechercheRoute(int i, int j, int tab[45][35], int distance,InfoGeneral* infoGeneral, int numConstruction)
+void afficher_successeurs(pSommet * sommet, int num)
+{
+    printf("Sommet %d :\n",num);
+
+    if(sommet[num]->arc == NULL){
+        printf("sommet[num] NULL\n");   //si il n'y a pas de successeurs
+    }
+    pArc arc=sommet[num]->arc;  //pointeur d'arc
+
+    while(arc!=NULL)//tant qu'il reste un arc sur le sommet on affiche son numéro
+    {
+        printf("%d \n",arc->sommet);
+        printf("poids : %d\n",arc->poids);
+        arc=arc->arc_suivant;       //on passe au sommet suivant
+    }
+}
+
+pSommet* CreerArete(pSommet* sommet,int s1,int s2,int poids)
+{
+    if(sommet[s1]->arc==NULL)
+    {
+        pArc Newarc=(pArc)malloc(sizeof(struct Arc));
+        Newarc->sommet=s2;
+        Newarc->arc_suivant=NULL;
+        Newarc->poids=poids;
+        sommet[s1]->arc=Newarc;
+        return sommet;
+    }
+    else
+    {
+        pArc temp=sommet[s1]->arc;
+        while( temp->arc_suivant!=NULL)
+        {
+            temp=temp->arc_suivant;
+        }
+        pArc Newarc=(pArc)malloc(sizeof(struct Arc));
+        Newarc->sommet=s2;
+        Newarc->arc_suivant=NULL;
+        Newarc->poids=poids;
+
+        if(temp->sommet>s2)
+        {
+            Newarc->poids=temp->poids;
+            temp->poids=poids;
+            Newarc->arc_suivant=temp->arc_suivant;
+            Newarc->sommet=temp->sommet;
+            temp->sommet=s2;
+            temp->arc_suivant=Newarc;
+            return sommet;
+        }
+        temp->arc_suivant=Newarc;
+        return sommet;
+    }
+}
+
+Graphe* CreerGraphe(int ordre)
+{
+    Graphe * Newgraphe=(Graphe*)malloc(sizeof(Graphe));
+    Newgraphe->pSommet = (pSommet*)malloc(ordre*sizeof(pSommet));
+
+    for(int i=0; i<ordre; i++)
+    {
+        Newgraphe->pSommet[i]=(pSommet)malloc(sizeof(struct Sommet));
+        Newgraphe->pSommet[i]->valeur=i;
+        Newgraphe->pSommet[i]->arc=NULL;
+        Newgraphe->pSommet[i]->pred=-1;
+    }
+    Newgraphe->ordre=ordre;
+    return Newgraphe;
+}
+
+Graphe * lire_graphe(char * nomFichier) //récupérer les infos du fichier
+{
+    Graphe* graphe;
+    FILE * ifs = fopen(nomFichier,"r");
+    int poids, ordre,i,j;
+
+    if (!ifs) //vérification de l'ouverture du fichier
+    {   printf("Erreur de lecture fichier\n");
+        exit(-1);}
+
+    fscanf(ifs,"%d\n",&ordre);  //on récupère l'odre du graphe
+
+    graphe= CreerGraphe(ordre); // creer le graphe vide d'ordre sommets
+
+    for(i=0;i<ordre;i++)        //récupérer la matrice d'adjacence
+    {
+        for(j=0;j<ordre;j++)
+        {
+            fscanf(ifs,"%d ",&graphe->matrice[i][j]); //chercher dans le fichier le poids de l'arete
+            poids=graphe->matrice[i][j];
+            if(poids!=0)        //Si le poids n'est pas nul, il y a une arete
+            {
+                graphe->pSommet=CreerArete(graphe->pSommet, i, j,poids); //ajout de l'arete au graphe
+            }
+        }
+    }
+    return graphe;
+}
+
+/*affichage du graphe avec les successeurs de chaque sommet */
+void graphe_afficher(Graphe* graphe)
+{
+    printf("ordre = %d\n",graphe->ordre);   //affiche l'ordre
+    printf("listes d'adjacence :\n");
+    for (int i=0; i<graphe->ordre; i++)
+    {
+        afficher_successeurs(graphe->pSommet, i);//affiche les sommets adjacents
+    }
+}
+
+InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGeneral, int numConstruction)
 {
     int k;
     tab[i][j]=0;
-    if ((distance>2))
+    if ((infoGeneral->distance>2))
     {
-        if((tab[i][j + 1] ==2))//||((tab[i][j+1] ==11)&&(tab[i][j+2] == 2)))
+        if(((tab[i][j + 1] ==2))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 2)))
         {
             printf("\nnouveau sommet");
-            return distance;
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            return infoGeneral;
 
         }
         if((tab[i][j-1]==2)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 2)))
         {
             printf("\nnouveau sommet");
-            return distance;
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            return infoGeneral;
 
         }
         if((tab[i-1][j]==2)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 2)))
         {
             printf("\nnouveau sommet");
-            return distance;
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            return infoGeneral;
 
         }
         if(((tab[i+1][j] ==2))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 2)))
         {
             printf("\nnouveau sommet");
-            /*
-            infoGeneral->maison[matriceCase[i+1][j].numConstruction].caseX = xcase;
-            infoGeneral->maison[infoGeneral->nombreMaison].caseY = ycase;
-            infoGeneral->citerne[infoGeneral->nombreCiterne].capeau =
-            */
-            return distance;
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            return infoGeneral;
         }
-    }
-    if ((distance>2)&&(((tab[i][j + 1] ==3)||(tab[i][j-1]==3)||(tab[i-1][j]==3)||(tab[i+1][j] ==3))||(((tab[i-1][j] ==1)&&(tab[i-2][j] == 3))||((tab[i+1][j] ==1)&&(tab[i+2][j] == 3))||((tab[i][j-1] ==1)&&(tab[i][j-2] == 3))||((tab[i][j+1] ==1)&&(tab[i][j+2] == 3)))))
-    {
-        printf("\nnouveau sommet");
-        return distance;
-    }
-    if ((distance>2)&&(((tab[i][j + 1] ==4)||(tab[i][j-1]==4)||(tab[i-1][j]==4)||(tab[i+1][j] ==4))||(((tab[i-1][j] ==1)&&(tab[i-2][j] == 4))||((tab[i+1][j] ==1)&&(tab[i+2][j] == 4))||((tab[i][j-1] ==1)&&(tab[i][j-2] == 4))||((tab[i][j+1] ==1)&&(tab[i][j+2] == 4)))))
-    {
-        printf("\nnouveau sommet");
-        return distance;
-    }
-    if ((distance>2)&&(((tab[i][j + 1] ==5)||(tab[i][j-1]==5)||(tab[i-1][j]==5)||(tab[i+1][j] ==5))||(((tab[i-1][j] ==1)&&(tab[i-2][j] == 2))||((tab[i+1][j] ==1)&&(tab[i+2][j] == 2))||((tab[i][j-1] ==1)&&(tab[i][j-2] == 2))||((tab[i][j+1] ==1)&&(tab[i][j+2] == 2)))))
-    {
-        printf("\nnouveau sommet");
-        return distance;
+        if(((tab[i][j + 1] ==3))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 3)))
+        {
+            printf("\nnouveau sommet");
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            return infoGeneral;
+
+        }
+        if((tab[i][j-1]==3)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 3)))
+        {
+            printf("\nnouveau sommet");
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            return infoGeneral;
+
+        }
+        if((tab[i-1][j]==3)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 3)))
+        {
+            printf("\nnouveau sommet");
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+
+            return infoGeneral;
+
+        }
+        if(((tab[i+1][j] ==3))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 3)))
+        {
+            printf("\nnouveau sommet");
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            return infoGeneral;
+        }
+        if(((tab[i][j + 1] ==4))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 4)))
+        {
+            printf("\nnouveau sommet");
+            return infoGeneral;
+        }
+        if((tab[i][j-1]==4)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 4)))
+        {
+            printf("\nnouveau sommet");
+            return infoGeneral;
+        }
+        if((tab[i-1][j]==4)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 4)))
+        {
+            printf("\nnouveau sommet");
+            return infoGeneral;
+        }
+        if(((tab[i+1][j] ==4))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 4)))
+        {
+            printf("\nnouveau sommet");
+            return infoGeneral;
+        }
+        if(((tab[i][j + 1] ==5))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 5)))
+        {
+            printf("\nnouveau sommet");
+            return infoGeneral;
+        }
+        if((tab[i][j-1]==5)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 5)))
+        {
+            printf("\nnouveau sommet");
+            return infoGeneral;
+        }
+        if((tab[i-1][j]==5)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 5)))
+        {
+            printf("\nnouveau sommet");
+            return infoGeneral;
+        }
+        if(((tab[i+1][j] ==5))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 5)))
+        {
+            printf("\nnouveau sommet");
+            return infoGeneral;
+        }
     }
     if (tab[i - 1][j] == 6)
     {
-        distance++;
-        distance = rechercheRoute(i-1, j, tab,distance,infoGeneral,numConstruction);
-        printf("\nsalut : distance %d:",distance);
+        infoGeneral->distance++;
+        infoGeneral = rechercheRoute(i-1, j, tab,infoGeneral,numConstruction);
+        printf("\nsalut : distance %d:",infoGeneral->distance);
     }
     if (tab[i + 1][j] == 6)
     {
-        distance++;
-        distance = rechercheRoute(i+1, j, tab,distance,infoGeneral,numConstruction);
-        printf("\nsalut : distance %d:",distance);
+        infoGeneral->distance++;
+        infoGeneral= rechercheRoute(i+1, j, tab,infoGeneral,numConstruction);
+        printf("\nsalut : distance %d:",infoGeneral->distance);
     }
     if (tab[i][j - 1] == 6)
     {
-        distance++;
-        distance = rechercheRoute(i, j-1, tab,distance,infoGeneral,numConstruction);
-        printf("\nsalut : distance %d:",distance);
+        infoGeneral->distance++;
+        infoGeneral= rechercheRoute(i, j-1, tab,infoGeneral,numConstruction);
+        printf("\nsalut : distance %d:",infoGeneral->distance);
     }
     if (tab[i][j + 1] == 6)
     {
-        distance++;
-        distance = rechercheRoute(i, j+1, tab,distance,infoGeneral,numConstruction);
-        printf("\nsalut : distance %d:",distance);
+        infoGeneral->distance++;
+        infoGeneral = rechercheRoute(i, j+1, tab,infoGeneral,numConstruction);
+        printf("\nsalut : distance %d:",infoGeneral->distance);
     }
-    printf("\ndistance %d:",distance);
-    distance--;
-    return distance;
+    printf("\ndistance : %d",infoGeneral->distance);
+    infoGeneral->distance--;
+    return infoGeneral;
 }
 
-int conversionTXTgraphe(InfoGeneral* infoGeneral) {
+InfoGeneral* conversionTXTgraphe(InfoGeneral* infoGeneral) {
     FILE *ifs = fopen("Test_matrice.txt","r");
     FILE *ifs2 = fopen("matriceCase.txt","w");
 
     int tab[45][35];
-    int distance=0;
+    infoGeneral->distance=0;
     int numConstruction;
     int i,j,k,l;
+    int ordre=0;
 
     if(ifs==NULL)
         printf("erreur");
@@ -275,58 +493,35 @@ int conversionTXTgraphe(InfoGeneral* infoGeneral) {
     fclose(ifs);
     fclose(ifs2);
 
+    //infoGeneral->graphe= CreerGraphe(infoGeneral->nbConstruction); // creer le graphe vide d'ordre sommets
+
     for ( i = 0; i < 35; i++) //récupérer les données de la matrice
     {
-        //i=8;
         for ( j = 0; j < 45; j++)
         {
-            //j=6;
             if(tab[i][j]==11)
             {
                 switch (tab[i][j+1])
                 {
-                    case 0: //rien
-                        break;
-                    case 1: //terrain  3*3
-                        break;
-                    case 2: //cabane 10H  3*3
-                        /*for (k = 0; k < 3; k++)
-                        {
-                            for (l = 0; l < 3; l++)
-                            {
-                                distance=rechercheRoute(i+k,j+l,tab,distance);
-                                distance=0;
-                            }
-                        }*/
-                        break;
-                    case 3: //maison 40H  3*3
-                        break;
-                    case 4: //immeuble 50H  3*3
-                        break;
-                    case 5: //gratte ciel 900H 3*3
-                        break;
-                    case 6: //route 4*6
-                        break;
                     case 7: //citerne 4*6
                         for (k = 0; k < 6; k++)
                         {
                             for (l = 0; l < 4; l++)
                             {
                                 numConstruction=matriceCase[i][j].numConstruction;
-                                distance=rechercheRoute(i+k,j+l,tab,distance, infoGeneral,numConstruction);
-                                distance=0;
+                                infoGeneral=rechercheRoute(i+k,j+l,tab, infoGeneral,numConstruction);
+                                infoGeneral->distance=0;
                             }
                         }
                         break;
                     case 8: //centrale elec
                         break;
-                    case 9:
-                        break;
                 }
             }
         }
     }
-    return distance;
+    graphe_afficher(infoGeneral->graphe);
+    return infoGeneral;
 }
 
 /*
@@ -445,15 +640,14 @@ void sauvegarde(Case tab[NOMBRELIGNE][NOMBRECOLONNE]) {
     }
     fclose(ifs);
 }
-
  */
-float largeurCaseGrille(short x1, short x2){
+int largeurCaseGrille(short x1, short x2){
     return (x2 - x1)/NOMBRECOLONNE;
 }
-float hauteurCaseGrille(short y1, short y2){
+int hauteurCaseGrille(short y1, short y2){
     return (y2 - y1)/NOMBRELIGNE;
 }
-float coordonneX1CaseGrille(short x1, short x2,short noCollonne) {
+short coordonneX1CaseGrille(short x1, short x2,short noCollonne) {
     return x1 + largeurCaseGrille(x1, x2) * (noCollonne - 1);
 }
 float coordonneX2CaseGrille(short x1, short x2,short noCollonne) {
@@ -722,7 +916,7 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
     }
 }
 
-void construireroute(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral){
+InfoGeneral* construireroute(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
@@ -731,15 +925,16 @@ void construireroute(short xSouris, short ySouris, short xcase , short ycase,Inf
                     matriceCase[ycase][xcase].obstacle = 6;
                     matriceCase[ycase][xcase].batiment=6;
                     infoGeneral->argent -=10;
+                    //infoGeneral= conversionTXTgraphe(infoGeneral);
                 }
             }
         }
     }
+    return infoGeneral;
 }
 
-void construireterrain(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral){
+InfoGeneral* construireterrain(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral){
     int caseVide = 0;
-    //infoGeneral->maison=(Maison*)malloc(infoGeneral->nombreMaison*sizeof(Maison));
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
@@ -752,7 +947,8 @@ void construireterrain(short xSouris, short ySouris, short xcase , short ycase,I
                 }
                 if(caseVide == 9 && infoGeneral->argent >= 1000) {
                     infoGeneral->argent -= 1000;
-                    infoGeneral->nombreMaison +=1;
+                    infoGeneral->nombreMaison =infoGeneral->nombreMaison+1;
+                    infoGeneral->nbConstruction =infoGeneral->nbConstruction+1;
                     infoGeneral->maison[infoGeneral->nombreMaison].caseX = xcase;
                     infoGeneral->maison[infoGeneral->nombreMaison].caseY = ycase;
                     for(short k = 0; k< 3; k++) {
@@ -760,17 +956,20 @@ void construireterrain(short xSouris, short ySouris, short xcase , short ycase,I
                             matriceCase[k + ycase][l + xcase].obstacle = 1;
                             matriceCase[ycase][xcase].etat = 1;
                             matriceCase[k+ycase][l+xcase].batiment=1;
-                            matriceCase[i][j].numConstruction=infoGeneral->nombreMaison;
+                            //matriceCase[k+ycase][l + xcase].numConstruction=infoGeneral->nombreMaison;
+                            matriceCase[k+ycase][l + xcase].numConstruction=infoGeneral->nbConstruction;
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
+                    //infoGeneral= conversionTXTgraphe(infoGeneral);
                 }
             }
         }
     }
+    return infoGeneral;
 }
 
-void construireciterne(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral,ALLEGRO_BITMAP* imageCiterne ){
+InfoGeneral* construireciterne(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral,ALLEGRO_BITMAP* imageCiterne ){
     short caseVide = 0;
     int distance=0;
     for(short i = 0; i< NOMBRECOLONNE; i++){
@@ -785,7 +984,8 @@ void construireciterne(short xSouris, short ySouris, short xcase , short ycase,I
                 }
                 if(caseVide == 24 && infoGeneral->argent >= 100000){
                     infoGeneral->argent -=100000;
-                    infoGeneral->nombreCiterne +=1;
+                    infoGeneral->nombreCiterne =infoGeneral->nombreCiterne +1;
+                    infoGeneral->nbConstruction=infoGeneral->nbConstruction+1;
                     infoGeneral->capeau +=5000;
                     infoGeneral->citerne[infoGeneral->nombreCiterne].caseX = xcase;
                     infoGeneral->citerne[infoGeneral->nombreCiterne].caseY = ycase;
@@ -796,18 +996,20 @@ void construireciterne(short xSouris, short ySouris, short xcase , short ycase,I
                             matriceCase[k + ycase][l + xcase].obstacle = 7;
                             matriceCase[ycase][xcase].etat = 7;
                             matriceCase[k+ycase][l+xcase].batiment=7;
-                            matriceCase[i][j].numConstruction=infoGeneral->nombreCiterne;
+                            //matriceCase[k + ycase][l + xcase].numConstruction=infoGeneral->nombreCiterne;
+                            matriceCase[k+ycase][l + xcase].numConstruction=infoGeneral->nbConstruction;
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
-                    distance= conversionTXTgraphe(infoGeneral);
+                    infoGeneral= conversionTXTgraphe(infoGeneral);
                 }
             }
         }
     }
+    return infoGeneral;
 }
 
-int construireusine(short xSouris, short ySouris, short xcase , short ycase, InfoGeneral* infoGeneral){
+InfoGeneral* construireusine(short xSouris, short ySouris, short xcase , short ycase, InfoGeneral* infoGeneral){
     short caseVide = 0;
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
@@ -822,6 +1024,7 @@ int construireusine(short xSouris, short ySouris, short xcase , short ycase, Inf
                 if(caseVide == 24 && infoGeneral->argent >= 100000){
                     infoGeneral->argent -=100000;
                     infoGeneral->nombreUsine +=1;
+                    infoGeneral->nbConstruction++;
                     infoGeneral->capelec +=5000;
                     infoGeneral->usine[infoGeneral->nombreUsine].caseX = xcase;
                     infoGeneral->usine[infoGeneral->nombreUsine].caseY = ycase;
@@ -830,17 +1033,20 @@ int construireusine(short xSouris, short ySouris, short xcase , short ycase, Inf
                             matriceCase[k + ycase][l + xcase].obstacle = 8;
                             matriceCase[ycase][xcase].etat = 8;
                             matriceCase[k+ycase][l+xcase].batiment=8;
-                            matriceCase[i][j].numConstruction=infoGeneral->nombreUsine;
+                            //matriceCase[k + ycase][l + xcase].numConstruction=infoGeneral->nombreUsine;
+                            matriceCase[k + ycase][l + xcase].numConstruction=infoGeneral->nbConstruction;
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
+                    //infoGeneral= conversionTXTgraphe(infoGeneral);
                 }
             }
         }
     }
+    return infoGeneral;
 }
 
-void destructionConstruction(short xSouris, short ySouris, short xcase , short ycase){
+InfoGeneral* destructionConstruction(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
@@ -850,7 +1056,7 @@ void destructionConstruction(short xSouris, short ySouris, short xcase , short y
                         for (short l = 0; l < 4; l++) {
                             matriceCase[k + ycase][ l + xcase].obstacle = 9;
                             matriceCase[ycase][xcase].batiment = 0;
-                            matriceCase[i][j].numConstruction=0;
+                            matriceCase[k + ycase][l + xcase].numConstruction=0;
                         }
                     }
                 }
@@ -860,7 +1066,7 @@ void destructionConstruction(short xSouris, short ySouris, short xcase , short y
                         for (short l = 0; l < 3; l++) {
                             matriceCase[k + ycase][ l + xcase].obstacle = 9;
                             matriceCase[ycase][xcase].batiment = 0;
-                            matriceCase[i][j].numConstruction=0;
+                            matriceCase[k + ycase][l + xcase].numConstruction=0;
                         }
                     }
                 }
@@ -872,9 +1078,10 @@ void destructionConstruction(short xSouris, short ySouris, short xcase , short y
             }
         }
     }
+    return infoGeneral;
 }
 
-void evolutionTerrain(InfoGeneral* infoGeneral){
+InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral){
     for(short i = 0; i< NOMBRECOLONNE; i++) {
         for (short j = 0; j < NOMBRELIGNE; j++) {
             if(matriceCase[j][i].obstacle == 4 )
@@ -925,6 +1132,7 @@ void evolutionTerrain(InfoGeneral* infoGeneral){
             }
         }
     }
+    return infoGeneral;
 }
 
 void dessinerBoutonOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGrande){
@@ -932,14 +1140,6 @@ void dessinerBoutonOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGran
 }
 
 int main() {
-    /*
-    int distance;
-    int tab[45][35];
-    distance= conversionTXTgraphe(tab);
-     */
-    //Graphe * g=lire_graphe("tp6.txt");
-    //graphe_afficher(g);    // afficher le graphe
-    //g= AlimentationEnEau(g);
 
     initAllegro();
     ALLEGRO_EVENT_QUEUE *queue = NULL;
@@ -978,14 +1178,16 @@ int main() {
     short etape = 0;
     short mode = 0;
     short boite = 0;
-    InfoGeneral infoGeneral;
-    infoGeneral.argent = 500000;
-    infoGeneral.habitant = 0;
-    infoGeneral.capeau = 0;
-    infoGeneral.capelec = 0;
-    infoGeneral.nombreMaison = 0;
-    infoGeneral.nombreCiterne = 0;
-    infoGeneral.nombreUsine = 0;
+    InfoGeneral* infoGeneral=malloc(sizeof (InfoGeneral));
+    infoGeneral->argent = 500000;
+    infoGeneral->habitant = 0;
+    infoGeneral->capeau = 0;
+    infoGeneral->capelec = 0;
+    infoGeneral->nombreMaison = 0;
+    infoGeneral->nombreCiterne = 0;
+    infoGeneral->nbConstruction=0;
+    infoGeneral->nombreUsine = 0;
+    infoGeneral->graphe= CreerGraphe(50); // creer le graphe vide d'ordre sommets
     double tempsRestant = 0.0;
     short mois = 0;
     short niveau = 0;
@@ -1005,8 +1207,6 @@ int main() {
     ALLEGRO_FONT *policeTexteTitre = initialiserPoliceTexteTitre(TAILLEPOLICETITRE);
     initDonneesJeu();
     initialiserCasesGrille();
-    //sauvegarde();
-    //liresauv();
     bool fin = false;
     al_flip_display();
     do {
@@ -1116,20 +1316,20 @@ int main() {
                     }
                 }
                 if (etape == 4 && route) {
-                    construireroute(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey,&infoGeneral);
+                    infoGeneral=construireroute(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey,infoGeneral);
                 }
                 if (etape == 4 && terrain) {
-                    construireterrain(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, &infoGeneral);
+                    infoGeneral=construireterrain(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, infoGeneral);
                 }
                 if (etape == 4 && citernec) {
-                    construireciterne(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, &infoGeneral,
+                    infoGeneral=construireciterne(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, infoGeneral,
                                       imageCiterne);
                 }
                 if (etape == 4 && usinec) {
-                    construireusine(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, &infoGeneral);
+                    infoGeneral=construireusine(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, infoGeneral);
                 }
                 if (etape == 4 && destruction) {
-                    destructionConstruction(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey);
+                    infoGeneral=destructionConstruction(sourisState.x,sourisState.y,souris1.Casex,souris1.Casey,infoGeneral);
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, X1PAUSE, Y1PAUSE,X2PAUSE, Y2PAUSE) && etape == 4) {
                     if(pause){
@@ -1190,15 +1390,15 @@ int main() {
                 dessinnerTouteCasesColorie();
                 afficherTempsRestant(tempsRestant, mois, policeTexte);
                 dessinerBoutonOutil(policeTexte, policeTexte);
-                dessinerInfosJeu(policeTexte, souris1.Casex,souris1.Casey,&infoGeneral);
+                dessinerInfosJeu(policeTexte, souris1.Casex,souris1.Casey,infoGeneral);
                 if (pause){
                     dessinerSauvegarde(policeTexte, policeTexte);
                 }
                 else if (tempsRestant >= 15.0) {
                     tempsRestant = 0.0;
                     mois++;
-                    evolutionTerrain(&infoGeneral);
-                    infoGeneral.argent = infoGeneral.argent+ 10 * infoGeneral.habitant;
+                    infoGeneral=evolutionTerrain(infoGeneral);
+                    infoGeneral->argent = infoGeneral->argent+ 10 * infoGeneral->habitant;
                 } else {
                     tempsRestant += 0.1;
                 }

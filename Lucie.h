@@ -534,7 +534,6 @@ Graphe* AlimentationElectricite(Graphe* graphe)
     graphe=PlusCourtCheminDistributionElec(graphe);
     afficheDistributionElec(graphe);
     graphe=DistributionElec(graphe);
-
     return graphe;
 }
 
@@ -597,7 +596,6 @@ int rechercheRoute(int i, int j, int tab[45][35], int distance,bool retour)
     distance--;
     return distance;
 }
-
 int conversionTXTgraphe(int tab[45][35]) {
     FILE *ifs = fopen("Test_matrice.txt","r");
 
