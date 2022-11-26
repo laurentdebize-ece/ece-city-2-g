@@ -312,28 +312,28 @@ InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGener
     {
         if(((tab[i][j + 1] ==2))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 2)))
         {
-            printf("\nnouveau sommet : %d",matriceCase[i][j+1].numConstruction);
+            printf("\nnouveau sommet : %d. numconstruction : %d",matriceCase[i][j+1].numConstruction,numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i][j+1].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
         }
         if((tab[i][j-1]==2)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 2)))
         {
-            printf("\nnouveau sommet : %d",matriceCase[i][j-1].numConstruction);
+            printf("\nnouveau sommet : %d, %d",matriceCase[i][j-1].numConstruction, numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i][j-1].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
         }
         if((tab[i-1][j]==2)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 2)))
         {
-            printf("\nnouveau sommet : %d",matriceCase[i-1][j].numConstruction);
+            printf("\nnouveau sommet : %d %d",matriceCase[i-1][j].numConstruction, numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i-1][j].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
         }
         if(((tab[i+1][j] ==2))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 2)))
         {
-            printf("\nnouveau sommet : %d",matriceCase[i+1][j].numConstruction);
+            printf("\nnouveau sommet : %d %d",matriceCase[i+1][j].numConstruction,numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i+1][j].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
@@ -450,13 +450,10 @@ InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGener
         infoGeneral = rechercheRoute(i, j+1, tab,infoGeneral,numConstruction);
         printf("\ndistance : %d",infoGeneral->distance);
     }
-    printf("\ndistance : %d",infoGeneral->distance);
     infoGeneral->distance--;
 
     return infoGeneral;
 }
-
-
 
 t_attente* ajoutListe(t_attente* attente,int numero)    //ajouter un numéro en fin de liste
 {
@@ -648,7 +645,6 @@ InfoGeneral * AlimentationEnEau(InfoGeneral* infoGeneral, int source)
 {
     infoGeneral=initDistributionEau(infoGeneral, source);   //démarrer bfs
     infoGeneral=PlusCourtCheminDistributionEau(infoGeneral); //faire bfs
-    //printf("salut");
     //afficheDistributionEau(graphe,source); //afficher bfs
     //infogeneral=DistributionEau(infoGeneral);
     return infoGeneral;
@@ -817,39 +813,38 @@ InfoGeneral* remplissageGraphe(InfoGeneral* infoGeneral) {
         printf("\n");
         fprintf(ifs2,"\n ");
     }
+
     fclose(ifs);
     fclose(ifs2);
-    //infoGeneral->graphe= CreerGraphe(infoGeneral->nbConstruction); // creer le graphe vide d'ordre sommets
-
     for ( i = 0; i < 35; i++) //récupérer les données de la matrice
     {
         for ( j = 0; j < 45; j++)
         {
             if(tab[i][j]==11)
             {
+                numConstruction=matriceCase[i][j].numConstruction;
                 switch (tab[i][j+1])
                 {
                     case 7: //citerne 4*6
+
                         for (k = 0; k < 6; k++)
                         {
                             for (l = 0; l < 4; l++)
                             {
-                                numConstruction=matriceCase[i][j].numConstruction;
                                 infoGeneral=rechercheRoute(i+k,j+l,tab, infoGeneral,numConstruction);
-                                //infoGeneral=AlimentationEnEau(infoGeneral);
                                 infoGeneral->distance=0;
                             }
                         }
-                        graphe_afficher(infoGeneral);
-
+                        printf("\n");
                         break;
                     case 8: //centrale elec
                         break;
                 }
             }
+
         }
     }
-    //graphe_afficher(infoGeneral);
+    graphe_afficher(infoGeneral);
     return infoGeneral;
 }
 
