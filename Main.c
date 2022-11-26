@@ -107,6 +107,12 @@
 #define CONSTRUCTION1 3
 #define CONSTRUCTION2 3
 #define CONSTRUCTION3 3
+
+#define NB_HABITANT_CABANE 10
+#define NB_HABITANT_MAISON 50
+#define NB_HABITANT_IMMEUBLE 100
+#define NB_HABITANT_GRATTECIEL 1000
+
 //Définition de la file d'attente
 
 typedef struct maillon
@@ -127,8 +133,6 @@ struct Arc
 {
     int sommet; // numero de sommet d'un arc adjacent au sommet initial
     int poids;      //aussi la capacité maximale de chaque arc
-    int flot;       //flot de l'arc, commence à 0 puis augmente
-    int ecart;      // écart entre le flot actuel et la capacité maximale
     struct Arc* arc_suivant;
 };
 
@@ -138,10 +142,10 @@ typedef struct Arc* pArc;
 /* Structure d'un sommet*/
 struct Sommet
 {
+    //bool chateau;
+    //bool habitation;
     struct Arc* arc;
-    bool chateau;
     int capacite;
-    bool habitation;
     int NbrHabitant;
     int valeur;
     int distance;
@@ -155,7 +159,7 @@ typedef struct Sommet* pSommet;
 typedef struct graphe
 {
     int ordre;
-    int** matrice;
+    //int** matrice;
     pSommet* pSommet;
     t_attente* attente;
 } Graphe;
@@ -190,7 +194,7 @@ typedef  struct Maison {
     int elec_utilise;
     int stade;
     int viable;
-    int nbMaison
+    int nbMaison;
 }Maison;
 
 typedef  struct Usine {
@@ -237,7 +241,6 @@ void afficher_successeurs(pSommet * sommet, int num)
         arc=arc->arc_suivant;       //on passe au sommet suivant
     }
 }
-
 pSommet* CreerArete(pSommet* sommet,int s1,int s2,int poids)
 {
     if(sommet[s1]->arc==NULL)
@@ -275,7 +278,6 @@ pSommet* CreerArete(pSommet* sommet,int s1,int s2,int poids)
         return sommet;
     }
 }
-
 Graphe* CreerGraphe(int ordre)
 {
     Graphe * Newgraphe=(Graphe*)malloc(sizeof(Graphe));
@@ -290,35 +292,6 @@ Graphe* CreerGraphe(int ordre)
     }
     Newgraphe->ordre=ordre;
     return Newgraphe;
-}
-
-Graphe * lire_graphe(char * nomFichier) //récupérer les infos du fichier
-{
-    Graphe* graphe;
-    FILE * ifs = fopen(nomFichier,"r");
-    int poids, ordre,i,j;
-
-    if (!ifs) //vérification de l'ouverture du fichier
-    {   printf("Erreur de lecture fichier\n");
-        exit(-1);}
-
-    fscanf(ifs,"%d\n",&ordre);  //on récupère l'odre du graphe
-
-    graphe= CreerGraphe(ordre); // creer le graphe vide d'ordre sommets
-
-    for(i=0;i<ordre;i++)        //récupérer la matrice d'adjacence
-    {
-        for(j=0;j<ordre;j++)
-        {
-            fscanf(ifs,"%d ",&graphe->matrice[i][j]); //chercher dans le fichier le poids de l'arete
-            poids=graphe->matrice[i][j];
-            if(poids!=0)        //Si le poids n'est pas nul, il y a une arete
-            {
-                graphe->pSommet=CreerArete(graphe->pSommet, i, j,poids); //ajout de l'arete au graphe
-            }
-        }
-    }
-    return graphe;
 }
 
 /*affichage du graphe avec les successeurs de chaque sommet */
@@ -340,97 +313,118 @@ InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGener
     {
         if(((tab[i][j + 1] ==2))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 2)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i][j+1].numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i][j+1].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
 
         }
         if((tab[i][j-1]==2)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 2)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i][j-1].numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i][j-1].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
-
         }
         if((tab[i-1][j]==2)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 2)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i-1][j].numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i-1][j].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
-
         }
         if(((tab[i+1][j] ==2))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 2)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i+1][j].numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i+1][j].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
         }
         if(((tab[i][j + 1] ==3))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 3)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i][j+1].numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i][j+1].numConstruction]->NbrHabitant=NB_HABITANT_MAISON;
             return infoGeneral;
-
         }
         if((tab[i][j-1]==3)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 3)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i][j-1].numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i][j-1].numConstruction]->NbrHabitant=NB_HABITANT_MAISON;
             return infoGeneral;
-
         }
         if((tab[i-1][j]==3)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 3)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i-1][j].numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
-
+            infoGeneral->graphe->pSommet[matriceCase[i-1][j].numConstruction]->NbrHabitant=NB_HABITANT_MAISON;
             return infoGeneral;
-
         }
         if(((tab[i+1][j] ==3))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 3)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i+1][j].numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i+1][j].numConstruction]->NbrHabitant=NB_HABITANT_MAISON;
             return infoGeneral;
         }
         if(((tab[i][j + 1] ==4))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 4)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i][j+1].numConstruction);
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i][j+1].numConstruction]->NbrHabitant=NB_HABITANT_IMMEUBLE;
             return infoGeneral;
         }
         if((tab[i][j-1]==4)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 4)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i][j-1].numConstruction);
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i][j-1].numConstruction]->NbrHabitant=NB_HABITANT_IMMEUBLE;
             return infoGeneral;
         }
         if((tab[i-1][j]==4)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 4)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i-1][j].numConstruction);
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i-1][j].numConstruction]->NbrHabitant=NB_HABITANT_IMMEUBLE;
+
             return infoGeneral;
         }
         if(((tab[i+1][j] ==4))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 4)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i+1][j].numConstruction);
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i+1][j].numConstruction]->NbrHabitant=NB_HABITANT_IMMEUBLE;
+
             return infoGeneral;
         }
         if(((tab[i][j + 1] ==5))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 5)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i][j+1].numConstruction);
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i][j+1].numConstruction]->NbrHabitant=NB_HABITANT_GRATTECIEL;
+
             return infoGeneral;
         }
         if((tab[i][j-1]==5)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 5)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i][j-1].numConstruction);
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i][j-1].numConstruction]->NbrHabitant=NB_HABITANT_GRATTECIEL;
             return infoGeneral;
         }
         if((tab[i-1][j]==5)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 5)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i-1][j].numConstruction);
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i-1][j].numConstruction]->NbrHabitant=NB_HABITANT_GRATTECIEL;
             return infoGeneral;
         }
         if(((tab[i+1][j] ==5))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 5)))
         {
-            printf("\nnouveau sommet");
+            printf("\nnouveau sommet : %d",matriceCase[i+1][j].numConstruction);
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet[matriceCase[i+1][j].numConstruction]->NbrHabitant=NB_HABITANT_GRATTECIEL;
             return infoGeneral;
         }
     }
@@ -438,32 +432,32 @@ InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGener
     {
         infoGeneral->distance++;
         infoGeneral = rechercheRoute(i-1, j, tab,infoGeneral,numConstruction);
-        printf("\nsalut : distance %d:",infoGeneral->distance);
+        printf("\ndistance : %d",infoGeneral->distance);
     }
     if (tab[i + 1][j] == 6)
     {
         infoGeneral->distance++;
         infoGeneral= rechercheRoute(i+1, j, tab,infoGeneral,numConstruction);
-        printf("\nsalut : distance %d:",infoGeneral->distance);
+        printf("\ndistance : %d",infoGeneral->distance);
     }
     if (tab[i][j - 1] == 6)
     {
         infoGeneral->distance++;
         infoGeneral= rechercheRoute(i, j-1, tab,infoGeneral,numConstruction);
-        printf("\nsalut : distance %d:",infoGeneral->distance);
+        printf("\ndistance : %d",infoGeneral->distance);
     }
     if (tab[i][j + 1] == 6)
     {
         infoGeneral->distance++;
         infoGeneral = rechercheRoute(i, j+1, tab,infoGeneral,numConstruction);
-        printf("\nsalut : distance %d:",infoGeneral->distance);
+        printf("\ndistance : %d",infoGeneral->distance);
     }
     printf("\ndistance : %d",infoGeneral->distance);
     infoGeneral->distance--;
     return infoGeneral;
 }
 
-InfoGeneral* conversionTXTgraphe(InfoGeneral* infoGeneral) {
+InfoGeneral* remplissageGraphe(InfoGeneral* infoGeneral) {
     FILE *ifs = fopen("Test_matrice.txt","r");
     FILE *ifs2 = fopen("matriceCase.txt","w");
 
@@ -473,11 +467,8 @@ InfoGeneral* conversionTXTgraphe(InfoGeneral* infoGeneral) {
     int i,j,k,l;
     int ordre=0;
 
-    if(ifs==NULL)
-        printf("erreur");
-
-    if(ifs2==NULL)
-        printf("erreur");
+    if(ifs==NULL)    {printf("erreur");}
+    if(ifs2==NULL)    {printf("erreur");}
 
     for ( i = 0; i < 35; i++) //récupérer les données de la matrice
     {
@@ -492,7 +483,6 @@ InfoGeneral* conversionTXTgraphe(InfoGeneral* infoGeneral) {
     }
     fclose(ifs);
     fclose(ifs2);
-
     //infoGeneral->graphe= CreerGraphe(infoGeneral->nbConstruction); // creer le graphe vide d'ordre sommets
 
     for ( i = 0; i < 35; i++) //récupérer les données de la matrice
@@ -522,6 +512,339 @@ InfoGeneral* conversionTXTgraphe(InfoGeneral* infoGeneral) {
     }
     graphe_afficher(infoGeneral->graphe);
     return infoGeneral;
+}
+
+
+t_attente* ajoutListe(t_attente* attente,int numero)    //ajouter un numéro en fin de liste
+{
+    t_maillon* maille = malloc(sizeof(t_maillon));  //alloc nouveau maillon
+    maille->numero=numero;
+    maille->suivant=NULL;
+    attente->fin->suivant=maille;   //ajout du maillon à la fin
+    attente->fin= maille;       //on pointe sur le nouveau maillon qui est à la fin
+    return attente;
+}
+t_attente *removeListe(t_attente* attente)
+{
+    attente->tete=attente->tete->suivant;   //on pointe sur le deuxième maillon : on perd le premier
+    return attente;
+}
+
+Graphe* initDistributionEau(Graphe* graphe,int source)  //Partie initialisation du BFS
+{
+    t_maillon* maille = malloc(sizeof(t_maillon)); //initialisation à null
+    graphe->attente = malloc(sizeof(t_attente));  //création de la file
+
+    graphe->attente->tete=graphe->attente->fin=NULL;
+
+    maille->numero=source;      //enfiler le premier maillon avec le numéro de la source
+    graphe->attente->tete= graphe->attente->fin=maille;     //On le fait que la premiere fois
+    graphe->attente->tete->suivant=graphe->attente->fin;        //quand la file est vide
+    graphe->attente->fin->suivant=NULL;
+
+    //graphe->pSommet[source]->chateau=1;//normalement on a déja cette info
+    //graphe->pSommet[source]->habitation=0;
+
+    for(int i=0;i<graphe->ordre;i++)
+    {
+        //graphe->pSommet[i]->habitation=1;
+        //graphe->pSommet[i]->chateau=0;
+        //graphe->pSommet[i]->NbrHabitant=2000;
+        graphe->pSommet[i]->couleur=0;//On note tous les sommets comme non repérés
+        graphe->pSommet[i]->distance=500;
+        graphe->pSommet[i]->pred=-1;
+    }
+    graphe->pSommet[source]->distance=0;
+    graphe->pSommet[source]->couleur=1; //la source est marquée
+    graphe->pSommet[source]->capacite=5000;
+
+    return graphe;
+}
+
+int selectionProchainSommet(Graphe* graphe)
+{
+    int numero;
+    int dmin=-1;
+    t_maillon* position = malloc(sizeof(t_maillon));//initialisation à null
+
+    position=graphe->attente->tete;
+    while(position!=NULL)
+    {
+        if(dmin==-1)
+        {
+            dmin=graphe->pSommet[position->numero]->distance;
+            numero=position->numero;
+        }
+        else if((graphe->pSommet[position->numero]->distance<dmin))
+        {
+            dmin=graphe->pSommet[position->numero]->distance;
+            numero=position->numero;
+        }
+        position=position->suivant;
+    }
+    return numero;
+}
+
+Graphe* PlusCourtCheminDistributionEau(Graphe* graphe)
+{
+    int numero,sommetDecouvert;
+    int distance;
+    pArc arc;//pointeur sur structure arc
+
+    while(graphe->attente->tete!=NULL)  //tant que la liste n'est pas vide
+    {
+
+        numero=selectionProchainSommet(graphe);   //on récupère le numéro du premier sommet
+        arc=graphe->pSommet[numero]->arc;   //on pointe sur un de ses arcs
+        if (arc==NULL)
+        {
+            printf("arc nul\n");
+        }
+        //printf("\n%d salut %d\n",numero,graphe->pSommet[numero]->arc->sommet);
+
+        while(arc!=NULL)
+        {
+            sommetDecouvert=arc->sommet;
+            distance=arc->poids;
+            printf("arc poids : %d\n",arc->poids);
+
+            if(graphe->pSommet[sommetDecouvert]->distance>(distance+graphe->pSommet[numero]->distance))
+            {
+                printf("salut");
+                graphe->pSommet[sommetDecouvert]->distance=(distance+graphe->pSommet[numero]->distance);
+                printf("\ndistance sommet %d : %d\n",sommetDecouvert,graphe->pSommet[sommetDecouvert]->distance);
+                graphe->pSommet[sommetDecouvert]->pred = numero;  //marquer prédecesseur du new sommet
+                if (graphe->pSommet[sommetDecouvert]->couleur == 0)  //si le sommet adjacent n'est pas découvert
+                {
+                    graphe->attente = ajoutListe(graphe->attente, sommetDecouvert);    //enfiler le new sommet
+                    graphe->pSommet[sommetDecouvert]->couleur = 1;        //marquer le sommet découvert
+                }
+                else if (graphe->pSommet[sommetDecouvert]->couleur == 1)  //si le sommet adjacent est découvert
+                {
+                    graphe->attente = ajoutListe(graphe->attente, sommetDecouvert);    //enfiler le new sommet
+                }
+            }
+            arc = arc->arc_suivant;     //pointer sur l'arc suivant
+            printf("salut\n");
+        }
+        graphe->attente=removeListe(graphe->attente);   //défiler le sommet actuel
+    }
+    return graphe;
+}
+void afficheDistributionEau(Graphe* graphe,int source)    //afficher le résultat du BFS
+{
+    int i,j;
+    for(i=0;i<graphe->ordre;i++)    //pour chaque sommet
+    {
+        j=i;
+        printf("\n%d",i);
+        while (j!=source)        //tant qu'on est pas remonté à la source
+        {
+            j=graphe->pSommet[j]->pred;
+            printf("<--%d",j);  //affichage du précédent
+        }
+        printf(" distance : %d",graphe->pSommet[i]->distance);
+    }
+}
+
+Graphe* DistributionEau(Graphe* graphe, int source)
+{
+    int* tab=malloc(graphe->ordre*sizeof(int));
+    int* tableau=malloc(graphe->ordre*sizeof(int));
+    int permutateur,i,j,position;
+
+    for(i=0;i<graphe->ordre;i++)
+    {
+        tableau[i] = graphe->pSommet[i]->distance;
+        tab[i] = i;
+    }
+    for (i=0; i < (graphe->ordre-1); i++)
+    {
+        position = i;
+        for (j = i + 1; j < graphe->ordre; j++)
+        {
+            if (tableau[position] > tableau[j])
+                position = j;
+        }
+        if (position != i)
+        {
+            permutateur = tableau[i];
+            tableau[i] = tableau[position];
+            tableau[position] = permutateur;
+            permutateur = tab[i];
+            tab[i] = tab[position];
+            tab[position] = permutateur;
+        }
+        printf("\nValeur: %d",tab[i]);
+    }
+    for (i=0;i<graphe->ordre;i++)
+    {
+        if ((graphe->pSommet[source]->NbrHabitant = 0)||(graphe->pSommet[source]->capacite == 0)) {}
+        else if (graphe->pSommet[source]->capacite - graphe->pSommet[tab[i]]->NbrHabitant > 0)
+        {
+            graphe->pSommet[source]->capacite = graphe->pSommet[source]->capacite - graphe->pSommet[tab[i]]->NbrHabitant;
+            printf("\nSommet %d allimente: %dL par le sommet %d", tab[i], graphe->pSommet[tab[i]]->NbrHabitant,source);
+            graphe->pSommet[tab[i]]->NbrHabitant=0;
+        }
+        else if (graphe->pSommet[source]->capacite - graphe->pSommet[tab[i]]->NbrHabitant < 0)
+        {
+            graphe->pSommet[tab[i]]->NbrHabitant = graphe->pSommet[tab[i]]->NbrHabitant - graphe->pSommet[source]->capacite;
+            graphe->pSommet[source]->capacite = 0;
+            printf("\nSommet %d allimente partiellement par le sommet %d, reste %dL a remplir", tab[i],source, graphe->pSommet[tab[i]]->NbrHabitant);
+        }
+    }
+    return graphe;
+}
+
+Graphe* AlimentationEnEau(Graphe* graphe, int source)
+{
+    graphe=initDistributionEau(graphe,source);   //démarrer bfs
+    graphe=PlusCourtCheminDistributionEau(graphe); //faire bfs
+    //printf("salut");
+    afficheDistributionEau(graphe,source); //afficher bfs
+    graphe=DistributionEau(graphe,source);
+    return graphe;
+}
+
+Graphe *initDistributionElec(Graphe *graphe,int numero)
+{
+    int source=0;
+    t_maillon* maille = malloc(sizeof(t_maillon));//initialisation à null
+
+    graphe->attente = malloc(sizeof(t_attente));  //création de la file
+    graphe->attente->tete=graphe->attente->fin=NULL;
+
+    maille->numero=numero;      //enfiler le premier maillon avec le numéro de la source
+    graphe->attente->tete= graphe->attente->fin=maille;     //On le fait que la premiere fois
+    graphe->attente->tete->suivant=graphe->attente->fin;        //quand la file est vide
+    graphe->attente->fin->suivant=NULL;
+
+    //graphe->pSommet[source]->chateau=1;//normalement on a déja cette info
+    //graphe->pSommet[source]->habitation=0;
+    graphe->pSommet[source]->capacite=5000;
+    graphe->pSommet[source]->couleur=1; //la source est marquée
+    graphe->pSommet[source]->distance=0;
+    graphe->pSommet[source]->pred=-1;    //tous les predecesseurs sont à -1: il n'y en a pas
+
+    for(int i=1;i<graphe->ordre;i++)
+    {
+        //graphe->pSommet[i]->habitation=1;
+        //graphe->pSommet[i]->chateau=0;
+        graphe->pSommet[i]->NbrHabitant=2000;
+        graphe->pSommet[i]->couleur=0;//On note tous les sommets comme non repérés
+        graphe->pSommet[i]->pred=-1;    //tous les predecesseurs sont à -1: il n'y en a pas
+        graphe->pSommet[i]->distance=500;
+    }
+    return graphe;
+}
+Graphe *PlusCourtCheminDistributionElec(Graphe *graphe)
+{
+    int numero,sommetDecouvert;
+    int distance;
+    pArc arc;//pointeur sur structure arc
+
+    while(graphe->attente->tete!=NULL)  //tant que la liste n'est pas vide
+    {
+        numero=selectionProchainSommet(graphe);   //on récupère le numéro du premier sommet
+        arc=graphe->pSommet[numero]->arc;   //on pointe sur un de ses arcs
+        while(arc!=NULL)
+        {
+            sommetDecouvert=arc->sommet;
+            distance=arc->poids;
+            if(graphe->pSommet[sommetDecouvert]->distance>(distance+graphe->pSommet[numero]->distance))
+            {
+                graphe->pSommet[sommetDecouvert]->distance=(distance+graphe->pSommet[numero]->distance);
+                printf("\ndistance sommet %d : %d",sommetDecouvert,graphe->pSommet[sommetDecouvert]->distance);
+                graphe->pSommet[sommetDecouvert]->pred = numero;  //marquer prédecesseur du new sommet
+                if (graphe->pSommet[sommetDecouvert]->couleur == 0)  //si le sommet adjacent n'est pas découvert
+                {
+                    graphe->attente = ajoutListe(graphe->attente, sommetDecouvert);    //enfiler le new sommet
+                    graphe->pSommet[sommetDecouvert]->couleur = 1;        //marquer le sommet découvert
+                }
+                else if (graphe->pSommet[sommetDecouvert]->couleur == 1)  //si le sommet adjacent n'est pas découvert
+                {
+                    graphe->attente = ajoutListe(graphe->attente, sommetDecouvert);    //enfiler le new sommet
+                }
+            }
+            arc = arc->arc_suivant;     //pointer sur l'arc suivant
+        }
+        graphe->attente=removeListe(graphe->attente);   //défiler le sommet actuel
+    }
+    return graphe;
+}
+void afficheDistributionElec(Graphe *graphe)
+{
+    int i,j;
+    for(i=0;i<graphe->ordre;i++)    //pour chaque sommet
+    {
+        j=i;
+        printf("\n%d",i);
+        while (j!=0)        //tant qu'on est pas remonté à la source
+        {
+            j=graphe->pSommet[j]->pred;
+            printf("<--%d",j);  //affichage du précédent
+        }
+        printf(" distance : %d",graphe->pSommet[i]->distance);
+    }
+}
+Graphe *DistributionElec(Graphe *graphe)
+{
+    int* tab=malloc(graphe->ordre*sizeof(int));
+    int* tableau=malloc(graphe->ordre*sizeof(int));
+    int permutateur,i,j,position;
+
+    for(i=0;i<graphe->ordre;i++)
+    {
+        tableau[i] = graphe->pSommet[i]->distance;
+        tab[i] = i;
+    }
+    for (i=0; i < (graphe->ordre-1); i++)
+    {
+        position = i;
+        for (j = i + 1; j < graphe->ordre; j++)
+        {
+            if (tableau[position] > tableau[j])
+                position = j;
+        }
+        if (position != i)
+        {
+            permutateur = tableau[i];
+            tableau[i] = tableau[position];
+            tableau[position] = permutateur;
+            permutateur = tab[i];
+            tab[i] = tab[position];
+            tab[position] = permutateur;
+        }
+        printf("\nValeur: %d",tab[i]);
+    }
+    graphe->pSommet[4]->NbrHabitant=3;
+
+    for (i=0;i<graphe->ordre;i++)
+    {
+        if ((graphe->pSommet[0]->NbrHabitant = 0)||(graphe->pSommet[0]->capacite == 0))
+        {
+            printf("\nSommet %d non allimente", tab[i]);
+        }
+        else if (graphe->pSommet[0]->capacite - graphe->pSommet[tab[i]]->NbrHabitant > 0)
+        {
+            graphe->pSommet[0]->capacite = graphe->pSommet[0]->capacite - graphe->pSommet[tab[i]]->NbrHabitant;
+            printf("\nSommet %d allimente: %dL", tab[i], graphe->pSommet[tab[i]]->NbrHabitant);
+        }
+        else if (graphe->pSommet[0]->capacite - graphe->pSommet[tab[i]]->NbrHabitant < 0)
+        {
+            printf("\nSommet %d non allimente car manque d'elec", tab[i]);
+        }
+    }
+    return graphe;
+}
+
+Graphe* AlimentationElectricite(Graphe* graphe)
+{
+    graphe=initDistributionElec(graphe,0);
+    graphe=PlusCourtCheminDistributionElec(graphe);
+    afficheDistributionElec(graphe);
+    graphe=DistributionElec(graphe);
+    return graphe;
 }
 
 /*
@@ -925,7 +1248,7 @@ InfoGeneral* construireroute(short xSouris, short ySouris, short xcase , short y
                     matriceCase[ycase][xcase].obstacle = 6;
                     matriceCase[ycase][xcase].batiment=6;
                     infoGeneral->argent -=10;
-                    //infoGeneral= conversionTXTgraphe(infoGeneral);
+                    //infoGeneral= remplissageGraphe(infoGeneral);
                 }
             }
         }
@@ -961,7 +1284,7 @@ InfoGeneral* construireterrain(short xSouris, short ySouris, short xcase , short
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
-                    //infoGeneral= conversionTXTgraphe(infoGeneral);
+                    //infoGeneral= remplissageGraphe(infoGeneral);
                 }
             }
         }
@@ -1001,7 +1324,8 @@ InfoGeneral* construireciterne(short xSouris, short ySouris, short xcase , short
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
-                    infoGeneral= conversionTXTgraphe(infoGeneral);
+                    infoGeneral= remplissageGraphe(infoGeneral);
+                    infoGeneral->graphe=AlimentationEnEau(infoGeneral->graphe,infoGeneral->nbConstruction);
                 }
             }
         }
@@ -1038,7 +1362,7 @@ InfoGeneral* construireusine(short xSouris, short ySouris, short xcase , short y
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
-                    //infoGeneral= conversionTXTgraphe(infoGeneral);
+                    infoGeneral= remplissageGraphe(infoGeneral);
                 }
             }
         }
@@ -1183,11 +1507,11 @@ int main() {
     infoGeneral->habitant = 0;
     infoGeneral->capeau = 0;
     infoGeneral->capelec = 0;
-    infoGeneral->nombreMaison = 0;
-    infoGeneral->nombreCiterne = 0;
-    infoGeneral->nbConstruction=0;
-    infoGeneral->nombreUsine = 0;
-    infoGeneral->graphe= CreerGraphe(50); // creer le graphe vide d'ordre sommets
+    infoGeneral->nombreMaison = -1;
+    infoGeneral->nombreCiterne = -1;
+    infoGeneral->nbConstruction=-1;
+    infoGeneral->nombreUsine = -1;
+    infoGeneral->graphe= CreerGraphe(10); // creer le graphe vide d'ordre sommets
     double tempsRestant = 0.0;
     short mois = 0;
     short niveau = 0;
