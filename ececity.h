@@ -165,7 +165,6 @@ typedef struct Case{
     int batiment,numConstruction;
     ALLEGRO_COLOR couleurCase;
 }Case;
-
 Case matriceCase[NOMBRELIGNE][NOMBRECOLONNE]; //plateau de jeu
 
 typedef struct souris{ // info souris
@@ -220,6 +219,7 @@ typedef struct infosJeu{
 
 
 t_infosJeu recupererInfosJeu(t_infosJeu infos);
+Graphe* CreerGraphe(int ordre);
 
 void initAllegro();
 

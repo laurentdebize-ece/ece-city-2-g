@@ -937,7 +937,6 @@ int verificationViable(InfoGeneral* infoGeneral, Case plateau[NOMBRELIGNE][NOMBR
             compteur++ ;
         }
     }
-
     for (int i = 0; i < NOMBRELIGNE; i++) {
         for (int j = 0; j < NOMBRECOLONNE; j++) {
             if (plateau[i][j].obstacle == 22)

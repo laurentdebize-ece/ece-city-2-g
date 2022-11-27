@@ -1,7 +1,6 @@
 #include "ececity.h"
 
 int main() {
-
     initAllegro();
     t_infosJeu InfosJeu;
     InfosJeu=recupererInfosJeu(InfosJeu);
