@@ -870,7 +870,7 @@ InfoGeneral* remplissageGraphe(InfoGeneral* infoGeneral) {
 t_infosJeu recupererInfosJeu(t_infosJeu infos)
 {
     FILE *ifs = fopen("infosJeu.txt","r");
-    int i,j;
+    int i = 0,j = 0;
     if(ifs==NULL)    {printf("erreur");}
 
     matriceCase[i][j].couleurCase = al_map_rgba(0,0,0,0);
