@@ -40,6 +40,7 @@ int main() {
     short etape = 0;
     short mode = 0;
     short boite = 0;
+
     InfoGeneral* infoGeneral=malloc(sizeof (InfoGeneral));
     infoGeneral->argent = 500000;
     infoGeneral->habitant = 0;

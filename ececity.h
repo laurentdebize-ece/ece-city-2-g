@@ -222,7 +222,6 @@ t_infosJeu recupererInfosJeu(t_infosJeu infos);
 Graphe* CreerGraphe(int ordre);
 
 void initAllegro();
-
 int largeurCaseGrille(short x1, short x2);
 int hauteurCaseGrille(short y1, short y2);
 short coordonneX1CaseGrille(short x1, short x2,short noCollonne);

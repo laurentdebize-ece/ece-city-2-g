@@ -949,7 +949,6 @@ int verificationViable(InfoGeneral* infoGeneral, Case plateau[NOMBRELIGNE][NOMBR
         return 0;
 }
 
-
 void verificationMaisonNonViables(InfoGeneral * infoGeneral,Case plateau[NOMBRELIGNE][NOMBRECOLONNE],int x, int y) {
     for (int i = 0; i < 50; i++) {
         if (infoGeneral->maison[i].vivable == 0) {
