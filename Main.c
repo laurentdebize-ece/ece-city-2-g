@@ -1457,6 +1457,12 @@ InfoGeneral* destructionConstruction(short xSouris, short ySouris, short xcase ,
         for(short j = 0; j<NOMBRELIGNE; j++) {
             if (checkSourisDansBouton(xSouris, ySouris, coordonneX1CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, j + 1),coordonneX2CaseGrille(X1GRILLE, X2GRILLE, i + 1),coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, j + 1))) {
                 if(matriceCase[ycase][xcase].etat == 7 || matriceCase[ycase][xcase].etat == 8){
+                    if(matriceCase[ycase][xcase].etat == 7){
+                        infoGeneral->capeau -= 5000;
+                    }
+                    if(matriceCase[ycase][xcase].etat == 8){
+                        infoGeneral->capelec -= 5000;
+                    }
                     matriceCase[ycase][xcase].etat = 0;
                     for(short k = 0; k< 6; k++) {
                         for (short l = 0; l < 4; l++) {
@@ -1467,6 +1473,18 @@ InfoGeneral* destructionConstruction(short xSouris, short ySouris, short xcase ,
                     }
                 }
                 if(matriceCase[ycase][xcase].etat >0 && matriceCase[ycase][xcase].etat<6){
+                    if(matriceCase[ycase][xcase].etat ==2) {
+                        infoGeneral->habitant -= 10;
+                    }
+                    if(matriceCase[ycase][xcase].etat ==3) {
+                        infoGeneral->habitant -= 50;
+                    }
+                    if(matriceCase[ycase][xcase].etat ==4) {
+                        infoGeneral->habitant -= 100;
+                    }
+                    if(matriceCase[ycase][xcase].etat ==5) {
+                        infoGeneral->habitant -= 1000;
+                    }
                     matriceCase[ycase][xcase].etat = 0;
                     for(short k = 0; k< 3; k++) {
                         for (short l = 0; l < 3; l++) {
@@ -1491,8 +1509,7 @@ InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral, short *mode){
     if(verificationViable(infoGeneral,matriceCase,infoGeneral->maison[infoGeneral->nombreMaison].caseX,infoGeneral->maison[infoGeneral->nombreMaison].caseY) || *mode == 2){
         for(short i = 0; i< NOMBRECOLONNE; i++) {
             for (short j = 0; j < NOMBRELIGNE; j++) {
-                if(matriceCase[j][i].obstacle == 4 )
-                {
+                if(matriceCase[j][i].obstacle == 4 && infoGeneral->habitant < infoGeneral->capelec && infoGeneral->habitant < infoGeneral->capeau){
                     matriceCase[j][i].obstacle = 5;
                     if(matriceCase[j][i].etat == 4 )
                     {
@@ -1504,7 +1521,7 @@ InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral, short *mode){
                         matriceCase[j][i].batiment = 5;
                     }
                 }
-                if(matriceCase[j][i].obstacle == 3 ){
+                if(matriceCase[j][i].obstacle == 3 && infoGeneral->habitant < infoGeneral->capelec && infoGeneral->habitant < infoGeneral->capeau){
                     matriceCase[j][i].obstacle = 4;
                     if(matriceCase[j][i].etat == 3 ){
                         matriceCase[j][i].etat = 4;
@@ -1515,7 +1532,7 @@ InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral, short *mode){
                         matriceCase[j][i].batiment = 4;
                     }
                 }
-                if(matriceCase[j][i].obstacle == 2 ){
+                if(matriceCase[j][i].obstacle == 2 && infoGeneral->habitant < infoGeneral->capelec && infoGeneral->habitant < infoGeneral->capeau){
                     matriceCase[j][i].obstacle = 3;
                     if(matriceCase[j][i].etat == 2 ){
                         matriceCase[j][i].etat = 3;
@@ -1526,7 +1543,7 @@ InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral, short *mode){
                         matriceCase[j][i].batiment = 3;
                     }
                 }
-                if(matriceCase[j][i].obstacle == 1 ){
+                if(matriceCase[j][i].obstacle == 1 && infoGeneral->habitant < infoGeneral->capelec && infoGeneral->habitant < infoGeneral->capeau){
                     matriceCase[j][i].obstacle = 2;
                     if(matriceCase[j][i].etat == 1 ){
                         matriceCase[j][i].etat = 2;
