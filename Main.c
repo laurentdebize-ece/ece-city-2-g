@@ -867,9 +867,8 @@ InfoGeneral* remplissageGraphe(InfoGeneral* infoGeneral) {
     return infoGeneral;
 }
 
-t_infosJeu recupererInfosJeu(t_infosJeu infos)
-{
-    FILE *ifs = fopen("infosJeu.txt","r");
+t_infosJeu recupererInfosJeu(t_infosJeu infos){
+    FILE *ifs = fopen("../infosJeu","r");
     int i = 0,j = 0;
     if(ifs==NULL)    {printf("erreur");}
 
