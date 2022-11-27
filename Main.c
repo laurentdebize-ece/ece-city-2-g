@@ -1231,7 +1231,7 @@ int verificationViable(InfoGeneral* infoGeneral, Case plateau[NOMBRELIGNE][NOMBR
                     rechercheCentral(infoGeneral, j + x, i + y, &connecteEau, &connecteElec,matriceCase);
                 }
             }
-            compteur++;
+            compteur++ ;
         }
     }
 
