@@ -92,6 +92,7 @@
 #define X1CAPEAU 1050
 #define X2CAPEAU 1200
 #define Y1CAPEAU 140
+#define Y1CAPEAU 140
 #define Y2CAPEAU 180
 #define X1CAPELEC 1050
 #define X2CAPELEC 1200
@@ -193,7 +194,7 @@ typedef  struct Maison {
     int eau_utilise;
     int elec_utilise;
     int stade;
-    int viable;
+    int vivable;
     int nbMaison;
 }Maison;
 
@@ -313,7 +314,7 @@ InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGener
     {
         if(((tab[i][j + 1] ==2))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 2)))
         {
-            printf("\nnouveau sommet : %d. numconstruction : %d",matriceCase[i][j+1].numConstruction,infoGeneral->source);
+            printf("\nnouveau sommet : %d",matriceCase[i][j+1].numConstruction);
             infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i][j+1].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
@@ -801,7 +802,6 @@ InfoGeneral* remplissageGraphe(InfoGeneral* infoGeneral) {
         printf("\n");
         fprintf(ifs2,"\n ");
     }
-
     fclose(ifs);
     fclose(ifs2);
     for ( i = 0; i < 35; i++) //récupérer les données de la matrice
@@ -813,8 +813,6 @@ InfoGeneral* remplissageGraphe(InfoGeneral* infoGeneral) {
                 switch (tab[i][j+1])
                 {
                     case 7: //citerne 4*6
-                        infoGeneral->source=matriceCase[i][j].numConstruction;
-
                         for (k = 0; k < 6; k++)
                         {
                             for (l = 0; l < 4; l++)
@@ -829,7 +827,6 @@ InfoGeneral* remplissageGraphe(InfoGeneral* infoGeneral) {
                         break;
                 }
             }
-
         }
     }
     graphe_afficher(infoGeneral);
@@ -1171,6 +1168,76 @@ void dessinneGrille( int x1, int y1, int x2, int y2, int epaisseur, ALLEGRO_COLO
             al_draw_textf(policeTexte, couleurGrille,x1 -22, y1 + j*hauteurCase +2,0,"  %d", j+1 );}
     }
 }
+
+
+void rechercheCentral(InfoGeneral* infoGeneral, int x, int y, bool*connecteEau, bool*connecteElec,Case matricePlateau[NOMBRELIGNE][NOMBRECOLONNE]) {
+    if (!(*connecteEau) || !(*connecteElec)) {
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                // recherche de central
+                if (!(i == j || i == -j)) {
+
+                    switch (matriceCase[y + i][x + j].obstacle) {
+                        case 6 : {
+                            matricePlateau[y + i][x + j].obstacle = 22;
+                            rechercheCentral(infoGeneral, x + j, y + i, connecteEau, connecteElec,matricePlateau);
+                            break;
+                        }
+                        case 7 : {
+                            // on a trouvé une centrale
+                            *connecteElec = true;
+                            break;
+                        }
+                        case 8 : {
+                            *connecteEau = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+int verificationViable(InfoGeneral* infoGeneral, Case plateau[NOMBRELIGNE][NOMBRECOLONNE],int x, int y) {
+    bool connecteEau = false;
+    bool connecteElec = false;
+    int compteur = 0;
+    for (int i = -1; i < 4; i++) {
+        for (int j = -1; j < 4; j++) {
+            if (compteur != 0 && compteur != 4 && compteur != 20 && compteur != 24) {
+                if (plateau[i + y][j + x].obstacle == 6) {
+                    rechercheCentral(infoGeneral, j + x, i + y, &connecteEau, &connecteElec,matriceCase);
+                }
+            }
+            compteur++ ;
+        }
+    }
+
+    for (int i = 0; i < NOMBRELIGNE; i++) {
+        for (int j = 0; j < NOMBRECOLONNE; j++) {
+            if (plateau[i][j].obstacle == 22)
+                plateau[i][j].obstacle = 6;
+        }
+    }
+    if (connecteElec && connecteEau)
+        return 1;
+    else
+        return 0;
+}
+
+
+void verificationMaisonNonViables(InfoGeneral * infoGeneral,Case plateau[NOMBRELIGNE][NOMBRECOLONNE],int x, int y) {
+    for (int i = 0; i < 50; i++) {
+        if (infoGeneral->maison[i].vivable == 0) {
+            infoGeneral->maison[i].vivable = verificationViable(infoGeneral, plateau,x , y);
+        }
+    }
+}
+
+
+
+
 void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* policeTexte,ALLEGRO_BITMAP* imageCiterne,ALLEGRO_BITMAP* imageCabane,ALLEGRO_BITMAP* imageMaison,ALLEGRO_BITMAP* imageImmeuble,ALLEGRO_BITMAP* imageGratteCiel, ALLEGRO_BITMAP* imageTerrain,ALLEGRO_BITMAP* imageUsine){
     dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0),policeTexte);
     for(short i = 0; i< NOMBRECOLONNE; i++){
@@ -1189,7 +1256,7 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
                     al_draw_bitmap(imageCabane, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].etat == 3) {
-                   al_draw_bitmap(imageMaison, 16*i+20, 16*j+20, 0);
+                    al_draw_bitmap(imageMaison, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].etat == 4) {
                     //matriceCase[j][i].couleurCase = al_map_rgb(100, 200, 0);
@@ -1237,7 +1304,8 @@ InfoGeneral* construireroute(short xSouris, short ySouris, short xcase , short y
                     matriceCase[ycase][xcase].obstacle = 6;
                     matriceCase[ycase][xcase].batiment=6;
                     infoGeneral->argent -=10;
-                    infoGeneral= remplissageGraphe(infoGeneral);
+                    //infoGeneral= remplissageGraphe(infoGeneral);
+                    verificationMaisonNonViables(infoGeneral,matriceCase, xcase,ycase);
                 }
             }
         }
@@ -1263,6 +1331,10 @@ InfoGeneral* construireterrain(short xSouris, short ySouris, short xcase , short
                     infoGeneral->nbConstruction =infoGeneral->nbConstruction+1;
                     infoGeneral->maison[infoGeneral->nombreMaison].caseX = xcase;
                     infoGeneral->maison[infoGeneral->nombreMaison].caseY = ycase;
+                    verificationViable(infoGeneral,matriceCase, xcase,ycase);
+                    if(verificationViable(infoGeneral,matriceCase, xcase,ycase)){
+                        printf("yo");
+                    }
                     for(short k = 0; k< 3; k++) {
                         for (short l = 0; l < 3; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 1;
@@ -1273,6 +1345,7 @@ InfoGeneral* construireterrain(short xSouris, short ySouris, short xcase , short
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
+                    //infoGeneral= remplissageGraphe(infoGeneral);
                 }
             }
         }
@@ -1313,7 +1386,7 @@ InfoGeneral* construireciterne(short xSouris, short ySouris, short xcase , short
                     }
                     matriceCase[ycase][xcase].batiment=11;
                     infoGeneral= remplissageGraphe(infoGeneral);
-                    infoGeneral=AlimentationEnEau(infoGeneral,infoGeneral->nbConstruction);
+                    //infoGeneral=AlimentationEnEau(infoGeneral);
                 }
             }
         }
@@ -1393,74 +1466,55 @@ InfoGeneral* destructionConstruction(short xSouris, short ySouris, short xcase ,
     return infoGeneral;
 }
 
-InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral){
-    for(short i = 0; i< NOMBRECOLONNE; i++) {
-        for (short j = 0; j < NOMBRELIGNE; j++) {
-            if(matriceCase[j][i].obstacle == 4 )
-            {
-                matriceCase[j][i].obstacle = 5;
-                if(matriceCase[j][i].etat == 4 )
+InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral, short *mode){
+    if(verificationViable(infoGeneral,matriceCase,infoGeneral->maison[infoGeneral->nombreMaison].caseX,infoGeneral->maison[infoGeneral->nombreMaison].caseY) || *mode == 2){
+        for(short i = 0; i< NOMBRECOLONNE; i++)
+        {
+            for (short j = 0; j < NOMBRELIGNE; j++) {
+                if(matriceCase[j][i].obstacle == 4 )
                 {
-                    matriceCase[j][i].etat = 5;
-                    infoGeneral->habitant+=900;
+                    matriceCase[j][i].obstacle = 5;
+                    if(matriceCase[j][i].etat == 4 )
+                    {
+                        matriceCase[j][i].etat = 5;
+                        infoGeneral->habitant+=900;
+                    }
+                    if(matriceCase[j][i].batiment == 4 )
+                    {
+                        matriceCase[j][i].batiment = 5;
+                    }
                 }
-                if(matriceCase[j][i].batiment == 4 )
-                {
-                    matriceCase[j][i].batiment = 5;
+                if(matriceCase[j][i].obstacle == 3 ){
+                    matriceCase[j][i].obstacle = 4;
+                    if(matriceCase[j][i].etat == 3 ){
+                        matriceCase[j][i].etat = 4;
+                        infoGeneral->habitant+=50;
+                    }
+                    if(matriceCase[j][i].batiment == 3 )
+                    {
+                        matriceCase[j][i].batiment = 4;
+                    }
                 }
-                if(matriceCase[j][i].batiment == 11)
-                {
-                    infoGeneral= remplissageGraphe(infoGeneral);
-                    infoGeneral=AlimentationEnEau(infoGeneral,infoGeneral->source);
+                if(matriceCase[j][i].obstacle == 2 ){
+                    matriceCase[j][i].obstacle = 3;
+                    if(matriceCase[j][i].etat == 2 ){
+                        matriceCase[j][i].etat = 3;
+                        infoGeneral->habitant+=40;
+                    }
+                    if(matriceCase[j][i].batiment == 2 )
+                    {
+                        matriceCase[j][i].batiment = 3;
+                    }
                 }
-            }
-            if(matriceCase[j][i].obstacle == 3 )
-            {
-                matriceCase[j][i].obstacle = 4;
-                if(matriceCase[j][i].etat == 3 )
-                {
-                    matriceCase[j][i].etat = 4;
-                    infoGeneral->habitant+=50;
-                }
-                if(matriceCase[j][i].batiment == 3)
-                {
-                    matriceCase[j][i].batiment = 4;
-                }
-                if(matriceCase[j][i].batiment == 11)
-                {
-                    infoGeneral= remplissageGraphe(infoGeneral);
-                    infoGeneral=AlimentationEnEau(infoGeneral,infoGeneral->source);
-                }
-            }
-            if(matriceCase[j][i].obstacle == 2 )
-            {
-                matriceCase[j][i].obstacle = 3;
-                if(matriceCase[j][i].etat == 2 )
-                {
-                    matriceCase[j][i].etat = 3;
-                    infoGeneral->habitant+=40;
-                }
-                if(matriceCase[j][i].batiment == 2 )
-                {
-                    matriceCase[j][i].batiment = 3;
-                }
-                if(matriceCase[j][i].batiment == 11)
-                {
-                    infoGeneral= remplissageGraphe(infoGeneral);
-                    infoGeneral=AlimentationEnEau(infoGeneral,infoGeneral->source);
-                }
-            }
-            if(matriceCase[j][i].obstacle == 1 )
-            {
-                matriceCase[j][i].obstacle = 2;
-                if(matriceCase[j][i].etat == 1 )
-                {
-                    matriceCase[j][i].etat = 2;
-                    infoGeneral->habitant+=10;
-                }
-                if(matriceCase[j][i].batiment == 1 )
-                {
-                    matriceCase[j][i].batiment = 2;
+                if(matriceCase[j][i].obstacle == 1 ) {
+                    matriceCase[j][i].obstacle = 2;
+                    if (matriceCase[j][i].etat == 1) {
+                        matriceCase[j][i].etat = 2;
+                        infoGeneral->habitant += 10;
+                    }
+                    if (matriceCase[j][i].batiment == 1) {
+                        matriceCase[j][i].batiment = 2;
+                    }
                 }
                 if(matriceCase[j][i].batiment == 11)
                 {
@@ -1661,7 +1715,7 @@ int main() {
                 }
                 if (etape == 4 && citernec) {
                     infoGeneral=construireciterne(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, infoGeneral,
-                                      imageCiterne);
+                                                  imageCiterne);
                 }
                 if (etape == 4 && usinec) {
                     infoGeneral=construireusine(sourisState.x, sourisState.y, souris1.Casex, souris1.Casey, infoGeneral);
@@ -1690,11 +1744,135 @@ int main() {
                         else{
                             pause = 1;
                         }
+                        break;
                     }
                     case ALLEGRO_KEY_ENTER : {
                         if (etape == 0){
                             etape = 3;
                         }
+                        break;
+                    }
+                    case ALLEGRO_KEY_0 : {
+                        if (etape == 4){
+                            niveau = 0;
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_1 : {
+                        if (etape == 4){
+                            niveau = 1;
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_2 : {
+                        if (etape == 4){
+                            niveau = 2;
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_O : {
+                        if (etape == 4){
+                            if (boite){
+                                boite = 0;
+                            }
+                            else{
+                                boite = 1;
+                            }
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_C : {
+                        if (etape == 4){
+                            if (citernec){
+                                citernec = 0;
+                            }
+                            else{
+                                usinec = 0; route = 0;terrain = 0;destruction = 0;citernec = 1;
+                            }
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_U : {
+                        if (etape == 4){
+                            if (usinec){
+                                usinec = 0;
+                            }
+                            else{
+                                route = 0;terrain = 0;destruction = 0;citernec = 0;usinec = 1;
+                            }
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_R : {
+                        if (etape == 4){
+                            if (route){
+                                route = 0;
+                            }
+                            else{
+                                terrain = 0;destruction = 0;citernec = 0;usinec = 0;route = 1;
+                            }
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_T : {
+                        if (etape == 4){
+                            if (terrain){
+                                terrain = 0;
+                            }
+                            else{
+                                destruction = 0;citernec = 0;usinec = 0;route = 0;terrain = 1;
+                            }
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_D : {
+                        if (etape == 4){
+                            if (destruction){
+                                destruction = 0;
+                            }
+                            else{
+                                citernec = 0;usinec = 0;route = 0;terrain = 0;destruction = 1;
+                            }
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_LEFT : {
+                        if (etape < 4){
+                            etape = 0;
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_A : {
+                        if (etape == 3){
+                            mode = 1;
+                            etape = 4;
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_Z : {
+                        if (etape == 3){
+                            mode = 2;
+                            etape = 4;
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_Q : {
+                        if (etape == 0){
+                            etape = 1;
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_W : {
+                        if (etape == 0){
+                            etape = 2;
+                        }
+                        break;
+                    }
+                    case ALLEGRO_KEY_S : {
+                        if (pause == 1){
+                            etape = 0;
+                        }
+                        break;
                     }
                 }
             }
@@ -1735,7 +1913,7 @@ int main() {
                 else if (tempsRestant >= 15.0) {
                     tempsRestant = 0.0;
                     mois++;
-                    infoGeneral=evolutionTerrain(infoGeneral);
+                    infoGeneral=evolutionTerrain(infoGeneral, &mode);
                     infoGeneral->argent = infoGeneral->argent+ 10 * infoGeneral->habitant;
                 } else {
                     tempsRestant += 0.1;
