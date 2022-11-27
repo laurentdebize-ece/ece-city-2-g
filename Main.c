@@ -223,8 +223,22 @@ typedef struct InfoGeneral{
     int capeau;
     int capelec;
     int distance;
+    int source;
     Graphe* graphe;
 }InfoGeneral;
+
+typedef struct infosJeu{
+    int prixTerrain;
+    int prixUsine;
+    int prixCiterne;
+    int prixRoute;
+    int nbHabcabane;
+    int nbHabmaison;
+    int nbHabimmeuble;
+    int nbHabgratteciel;
+    int capaciteCiterne;
+    int capaciteUsine;
+}t_infosJeu;
 
 void afficher_successeurs(pSommet * sommet, int num)
 {
@@ -305,7 +319,7 @@ void graphe_afficher(InfoGeneral * infoGeneral)
     }
 }
 
-InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGeneral, int numConstruction)
+InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGeneral)
 {
     int k;
     tab[i][j]=0;
@@ -314,77 +328,77 @@ InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGener
         if(((tab[i][j + 1] ==2))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 2)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i][j+1].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i][j+1].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
         }
         if((tab[i][j-1]==2)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 2)))
         {
-            printf("\nnouveau sommet : %d",matriceCase[i][j-1].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            printf("\nnouveau sommet : %d, %d",matriceCase[i][j-1].numConstruction, infoGeneral->source);
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i][j-1].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
         }
         if((tab[i-1][j]==2)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 2)))
         {
-            printf("\nnouveau sommet : %d",matriceCase[i-1][j].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            printf("\nnouveau sommet : %d %d",matriceCase[i-1][j].numConstruction, infoGeneral->source);
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i-1][j].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
         }
         if(((tab[i+1][j] ==2))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 2)))
         {
-            printf("\nnouveau sommet : %d",matriceCase[i+1][j].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            printf("\nnouveau sommet : %d %d",matriceCase[i+1][j].numConstruction,infoGeneral->source);
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i+1][j].numConstruction]->NbrHabitant=NB_HABITANT_CABANE;
             return infoGeneral;
         }
         if(((tab[i][j + 1] ==3))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 3)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i][j+1].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i][j+1].numConstruction]->NbrHabitant=NB_HABITANT_MAISON;
             return infoGeneral;
         }
         if((tab[i][j-1]==3)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 3)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i][j-1].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i][j-1].numConstruction]->NbrHabitant=NB_HABITANT_MAISON;
             return infoGeneral;
         }
         if((tab[i-1][j]==3)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 3)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i-1][j].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i-1][j].numConstruction]->NbrHabitant=NB_HABITANT_MAISON;
             return infoGeneral;
         }
         if(((tab[i+1][j] ==3))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 3)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i+1][j].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i+1][j].numConstruction]->NbrHabitant=NB_HABITANT_MAISON;
             return infoGeneral;
         }
         if(((tab[i][j + 1] ==4))||((tab[i][j+1] ==11)&&(tab[i][j+2] == 4)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i][j+1].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i][j+1].numConstruction]->NbrHabitant=NB_HABITANT_IMMEUBLE;
             return infoGeneral;
         }
         if((tab[i][j-1]==4)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 4)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i][j-1].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i][j-1].numConstruction]->NbrHabitant=NB_HABITANT_IMMEUBLE;
             return infoGeneral;
         }
         if((tab[i-1][j]==4)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 4)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i-1][j].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i-1][j].numConstruction]->NbrHabitant=NB_HABITANT_IMMEUBLE;
 
             return infoGeneral;
@@ -392,7 +406,7 @@ InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGener
         if(((tab[i+1][j] ==4))||((tab[i+1][j] ==11)&&(tab[i+2][j] == 4)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i+1][j].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i+1][j].numConstruction]->NbrHabitant=NB_HABITANT_IMMEUBLE;
 
             return infoGeneral;
@@ -400,7 +414,7 @@ InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGener
         if((tab[i][j + 1] ==5)||((tab[i][j+1] ==11)&&(tab[i][j+2] == 5)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i][j+1].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i][j+1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i][j+1].numConstruction]->NbrHabitant=NB_HABITANT_GRATTECIEL;
 
             return infoGeneral;
@@ -408,21 +422,21 @@ InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGener
         if((tab[i][j-1]==5)||((tab[i][j-1] ==11)&&(tab[i][j-2] == 5)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i][j-1].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i][j-1].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i][j-1].numConstruction]->NbrHabitant=NB_HABITANT_GRATTECIEL;
             return infoGeneral;
         }
         if((tab[i-1][j]==5)||((tab[i-1][j] ==11)&&(tab[i-2][j] == 5)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i-1][j].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i-1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i-1][j].numConstruction]->NbrHabitant=NB_HABITANT_GRATTECIEL;
             return infoGeneral;
         }
         if((tab[i+1][j] ==5)||((tab[i+1][j] ==11)&&(tab[i+2][j] == 5)))
         {
             printf("\nnouveau sommet : %d",matriceCase[i+1][j].numConstruction);
-            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, numConstruction, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
+            infoGeneral->graphe->pSommet=CreerArete(infoGeneral->graphe->pSommet, infoGeneral->source, matriceCase[i+1][j].numConstruction,infoGeneral->distance); //ajout de l'arete au graphe
             infoGeneral->graphe->pSommet[matriceCase[i+1][j].numConstruction]->NbrHabitant=NB_HABITANT_GRATTECIEL;
             return infoGeneral;
         }
@@ -430,25 +444,25 @@ InfoGeneral* rechercheRoute(int i, int j, int tab[45][35],InfoGeneral* infoGener
     if (tab[i - 1][j] == 6)
     {
         infoGeneral->distance++;
-        infoGeneral = rechercheRoute(i-1, j, tab,infoGeneral,numConstruction);
+        infoGeneral = rechercheRoute(i-1, j, tab,infoGeneral);
         printf("\ndistance : %d",infoGeneral->distance);
     }
     if (tab[i + 1][j] == 6)
     {
         infoGeneral->distance++;
-        infoGeneral= rechercheRoute(i+1, j, tab,infoGeneral,numConstruction);
+        infoGeneral= rechercheRoute(i+1, j, tab,infoGeneral);
         printf("\ndistance : %d",infoGeneral->distance);
     }
     if (tab[i][j - 1] == 6)
     {
         infoGeneral->distance++;
-        infoGeneral= rechercheRoute(i, j-1, tab,infoGeneral,numConstruction);
+        infoGeneral= rechercheRoute(i, j-1, tab,infoGeneral);
         printf("\ndistance : %d",infoGeneral->distance);
     }
     if (tab[i][j + 1] == 6)
     {
         infoGeneral->distance++;
-        infoGeneral = rechercheRoute(i, j+1, tab,infoGeneral,numConstruction);
+        infoGeneral = rechercheRoute(i, j+1, tab,infoGeneral);
         printf("\ndistance : %d",infoGeneral->distance);
     }
     printf("\ndistance : %d",infoGeneral->distance);
@@ -580,18 +594,20 @@ InfoGeneral * PlusCourtCheminDistributionEau(InfoGeneral * infoGeneral)
 }
 void afficheDistributionEau(InfoGeneral* infoGeneral)    //afficher le résultat du BFS
 {
-    int i,j;
+    int i=0,j;
     int source=infoGeneral->nbConstruction;
-    for(i=0;i<infoGeneral->graphe->ordre;i++)    //pour chaque sommet
+    while(infoGeneral->graphe->pSommet[i]!=NULL)    //pour chaque sommet
     {
         j=i;
         printf("\n%d",i);
-        while (j!=source)        //tant qu'on est pas remonté à la source
+
+        while (j != source)        //tant qu'on est pas remonté à la source
         {
-            j=infoGeneral->graphe->pSommet[j]->pred;
-            printf("<--%d",j);  //affichage du précédent
+            j = infoGeneral->graphe->pSommet[j]->pred;
+            printf("<--%d", j);  //affichage du précédent
         }
-        printf(" distance : %d",infoGeneral->graphe->pSommet[i]->distance);
+        printf(" distance : %d", infoGeneral->graphe->pSommet[i]->distance);
+        i++;
     }
 }
 
@@ -626,10 +642,10 @@ InfoGeneral * DistributionEau(InfoGeneral* infoGeneral)
         }
         printf("\nValeur: %d",tab[i]);
     }
-    for (i=0;i<infoGeneral->graphe->ordre;i++)
+    for (i=0;i<infoGeneral->nbConstruction;i++)
     {
         if ((infoGeneral->graphe->pSommet[source]->NbrHabitant = 0)||(infoGeneral->graphe->pSommet[source]->capacite == 0)) {}
-        else if (infoGeneral->graphe->pSommet[source]->capacite - infoGeneral->graphe->pSommet[tab[i]]->NbrHabitant > 0)
+        else if (infoGeneral->graphe->pSommet[source]->capacite - infoGeneral->graphe->pSommet[tab[i]]->NbrHabitant >= 0)
         {
             infoGeneral->graphe->pSommet[source]->capacite = infoGeneral->graphe->pSommet[source]->capacite - infoGeneral->graphe->pSommet[tab[i]]->NbrHabitant;
             printf("\nSommet %d allimente: %dL par le sommet %d", tab[i], infoGeneral->graphe->pSommet[tab[i]]->NbrHabitant,source);
@@ -835,14 +851,11 @@ InfoGeneral* remplissageGraphe(InfoGeneral* infoGeneral) {
                         {
                             for (l = 0; l < 4; l++)
                             {
-                                numConstruction=matriceCase[i][j].numConstruction;
-                                infoGeneral=rechercheRoute(i+k,j+l,tab, infoGeneral,numConstruction);
-                                //infoGeneral=AlimentationEnEau(infoGeneral);
+                                //infoGeneral=rechercheRoute(i+k,j+l,tab, infoGeneral);
                                 infoGeneral->distance=0;
                             }
                         }
-                        graphe_afficher(infoGeneral);
-
+                        printf("\n");
                         break;
                     case 8: //centrale elec
                         break;
@@ -850,8 +863,27 @@ InfoGeneral* remplissageGraphe(InfoGeneral* infoGeneral) {
             }
         }
     }
-    //graphe_afficher(infoGeneral);
+    graphe_afficher(infoGeneral);
     return infoGeneral;
+}
+
+t_infosJeu recupererInfosJeu(t_infosJeu infos)
+{
+    FILE *ifs = fopen("infosJeu.txt","r");
+    int i,j;
+    if(ifs==NULL)    {printf("erreur");}
+
+    matriceCase[i][j].couleurCase = al_map_rgba(0,0,0,0);
+    fscanf(ifs,"%d ",&infos.prixTerrain);
+    fscanf(ifs,"%d ",&infos.prixUsine);
+    fscanf(ifs,"%d ",&infos.prixCiterne);
+    fscanf(ifs,"%d ",&infos.prixRoute);
+    fscanf(ifs,"%d ",&infos.nbHabcabane);
+    fscanf(ifs,"%d ",&infos.nbHabmaison);
+    fscanf(ifs,"%d ",&infos.nbHabimmeuble);
+    fscanf(ifs,"%d ",&infos.nbHabgratteciel);
+    fclose(ifs);
+    return infos;
 }
 
 /*
@@ -989,19 +1021,28 @@ float coordonneY1CaseGrille( short y1,  short y2,short noLigne) {
 float coordonneY2CaseGrille( short y1,  short y2,short noLigne) {
     return y1 + hauteurCaseGrille(y1,y2) * (noLigne);
 }
-void initialiserCasesGrille(){
-    for(short i = 0; i<NOMBRELIGNE; i++){
-        for(short j = 0; j < NOMBRECOLONNE; j++){
+void initialiserCasesGrille()
+{
+    FILE *ifs = fopen("matriceDebut.txt","r");
+    int i,j;
+    if(ifs==NULL)    {printf("erreur");}
+
+    for ( i = 0; i < NOMBRELIGNE; i++) //récupérer les données de la matrice
+    {
+        for ( j = 0; j < NOMBRECOLONNE; j++)
+        {
             matriceCase[i][j].x1Case = coordonneX1CaseGrille(X1GRILLE, X2GRILLE, j+1);
             matriceCase[i][j].y1Case = coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, i+1);
             matriceCase[i][j].x2Case = coordonneX2CaseGrille(X1GRILLE, X2GRILLE, j+1);
             matriceCase[i][j].y2Case = coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, i+1);
-            matriceCase[i][j].obstacle = 0;
-            matriceCase[i][j].batiment=0;
-            matriceCase[i][j].numConstruction=0;
+            //matriceCase[i][j].batiment=0;
+            //matriceCase[i][j].numConstruction=0;
             matriceCase[i][j].couleurCase = al_map_rgba(0,0,0,0);
+            fscanf(ifs,"%d ",&matriceCase[i][j].obstacle);
+            fscanf(ifs,"%d ",&matriceCase[i][j].etat);
         }
     }
+    fclose(ifs);
 }
 void chercherCaseDeLaSourie(int x, int y, int *caseX, int *caseY, bool *dansPlateau) {
     if ((x >= 20 && x <= 920) && (y >= 20 && y <= 720)) {
@@ -1026,6 +1067,7 @@ void chercherCaseDeLaSourie(int x, int y, int *caseX, int *caseY, bool *dansPlat
         *caseY = 0;
     }
 }
+
 void initDonneesJeu(){
     //initialiserTabBouton();
     initialiserCasesGrille();
@@ -1316,6 +1358,28 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
     }
 }
 
+void sauvegarde()
+{
+    FILE *ifs = fopen("SauvegardeObstacle.txt","w");
+    FILE *ifs2 = fopen("SauvegardeEtat.txt","w");
+    int i,j;
+    if(ifs==NULL)    {printf("erreur");}
+    if(ifs2==NULL)    {printf("erreur");}
+
+    for ( i = 0; i < 35; i++) //récupérer les données de la matrice
+    {
+        for ( j = 0; j < 45; j++)
+        {
+            fprintf(ifs,"%d ",matriceCase[i][j].obstacle);
+            fprintf(ifs2,"%d ",matriceCase[i][j].etat);
+        }
+        fprintf(ifs,"\n ");
+        fprintf(ifs2,"\n ");
+    }
+    fclose(ifs);
+    fclose(ifs2);
+}
+
 InfoGeneral* construireroute(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
@@ -1366,6 +1430,7 @@ InfoGeneral* construireterrain(short xSouris, short ySouris, short xcase , short
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
+                    sauvegarde();
                     //infoGeneral= remplissageGraphe(infoGeneral);
                 }
             }
@@ -1406,7 +1471,8 @@ InfoGeneral* construireciterne(short xSouris, short ySouris, short xcase , short
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
-                    infoGeneral= remplissageGraphe(infoGeneral);
+                    sauvegarde();
+                    //infoGeneral= remplissageGraphe(infoGeneral);
                     //infoGeneral=AlimentationEnEau(infoGeneral);
                 }
             }
@@ -1444,7 +1510,8 @@ InfoGeneral* construireusine(short xSouris, short ySouris, short xcase , short y
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
-                    infoGeneral= remplissageGraphe(infoGeneral);
+                    sauvegarde();
+                    //infoGeneral= remplissageGraphe(infoGeneral);
                 }
             }
         }
@@ -1502,12 +1569,14 @@ InfoGeneral* destructionConstruction(short xSouris, short ySouris, short xcase ,
             }
         }
     }
+    sauvegarde();
     return infoGeneral;
 }
 
 InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral, short *mode){
     if(verificationViable(infoGeneral,matriceCase,infoGeneral->maison[infoGeneral->nombreMaison].caseX,infoGeneral->maison[infoGeneral->nombreMaison].caseY) || *mode == 2){
-        for(short i = 0; i< NOMBRECOLONNE; i++) {
+        for(short i = 0; i< NOMBRECOLONNE; i++)
+        {
             for (short j = 0; j < NOMBRELIGNE; j++) {
                 if(matriceCase[j][i].obstacle == 4 && infoGeneral->habitant < infoGeneral->capelec && infoGeneral->habitant < infoGeneral->capeau){
                     matriceCase[j][i].obstacle = 5;
@@ -1545,18 +1614,23 @@ InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral, short *mode){
                 }
                 if(matriceCase[j][i].obstacle == 1 && infoGeneral->habitant < infoGeneral->capelec && infoGeneral->habitant < infoGeneral->capeau){
                     matriceCase[j][i].obstacle = 2;
-                    if(matriceCase[j][i].etat == 1 ){
+                    if (matriceCase[j][i].etat == 1) {
                         matriceCase[j][i].etat = 2;
-                        infoGeneral->habitant+=10;
+                        infoGeneral->habitant += 10;
                     }
-                    if(matriceCase[j][i].batiment == 1 )
-                    {
+                    if (matriceCase[j][i].batiment == 1) {
                         matriceCase[j][i].batiment = 2;
                     }
+                }
+                if(matriceCase[j][i].batiment == 11)
+                {
+                    //infoGeneral= remplissageGraphe(infoGeneral);
+                    //infoGeneral=AlimentationEnEau(infoGeneral,infoGeneral->source);
                 }
             }
         }
     }
+    sauvegarde();
     return infoGeneral;
 }
 
@@ -1567,6 +1641,8 @@ void dessinerBoutonOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGran
 int main() {
 
     initAllegro();
+    t_infosJeu InfosJeu;
+    InfosJeu=recupererInfosJeu(InfosJeu);
     ALLEGRO_EVENT_QUEUE *queue = NULL;
     ALLEGRO_EVENT_QUEUE *temps = NULL;
     ALLEGRO_EVENT event;
