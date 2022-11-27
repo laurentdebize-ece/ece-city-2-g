@@ -1,3 +1,5 @@
+//Bibliothèque dont Allegro
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +11,8 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 #include <math.h>
+
+// Macro
 
 #define LARGEURFENETRE 1250
 #define HAUTEURFENETRE 660
@@ -81,33 +85,15 @@
 #define Y2SAUVEGARDE 600
 
 #define X1ARGENT 830
-#define X2ARGENT 970
 #define Y1ARGENT 140
-#define Y2ARGENT 180
 #define X1HABITANT 830
-#define X2HABITANT 970
 #define Y1HABITANT 180
-#define Y2HABITANT 220
 
 #define X1CAPEAU 1050
-#define X2CAPEAU 1200
 #define Y1CAPEAU 140
 #define Y1CAPEAU 140
-#define Y2CAPEAU 180
 #define X1CAPELEC 1050
-#define X2CAPELEC 1200
 #define Y1CAPELEC 180
-#define Y2CAPELEC 220
-
-#define MONTER  1
-#define DESCENDRE 3
-#define DROITE 2
-#define GAUCHE 4
-#define NOMBREOBSTACLESDIFFERENT 9
-
-#define CONSTRUCTION1 3
-#define CONSTRUCTION2 3
-#define CONSTRUCTION3 3
 
 #define NB_HABITANT_CABANE 10
 #define NB_HABITANT_MAISON 50
@@ -143,8 +129,6 @@ typedef struct Arc* pArc;
 /* Structure d'un sommet*/
 struct Sommet
 {
-    //bool chateau;
-    //bool habitation;
     struct Arc* arc;
     int capacite;
     int NbrHabitant;
@@ -160,12 +144,11 @@ typedef struct Sommet* pSommet;
 typedef struct graphe
 {
     int ordre;
-    //int** matrice;
     pSommet* pSommet;
     t_attente* attente;
 } Graphe;
 
-typedef struct Bouton{
+typedef struct Bouton{ //pour affichage
     short  x1Bouton, y1Bouton, x2Bouton, y2Bouton, taillePolice, action;
     char nomBouton[20];
     ALLEGRO_COLOR couleurBouton, couleurTexte, couleurPassageBouton;
@@ -178,24 +161,16 @@ typedef struct Case{
     ALLEGRO_COLOR couleurCase;
 }Case;
 
-Case matriceCase[NOMBRELIGNE][NOMBRECOLONNE];
+Case matriceCase[NOMBRELIGNE][NOMBRECOLONNE]; //plateau de jeu
 
-typedef struct souris{
+typedef struct souris{ // info souris
     short Casex, Casey;
     bool interieurPlateau;
 }souris;
 
 typedef  struct Maison {
-    //ALLEGRO_BITMAP image_stade_batiment[6];
-    int largeur,hauteur;
-    int date_creation;
     int caseX, caseY;
-    int nb_habitant;
-    int eau_utilise;
-    int elec_utilise;
-    int stade;
     int vivable;
-    int nbMaison;
 }Maison;
 
 typedef  struct Usine {
@@ -885,41 +860,8 @@ t_infosJeu recupererInfosJeu(t_infosJeu infos){
     return infos;
 }
 
-/*
-typedef  struct Maison_alimentee {
-   int numero_maison;
-   int quantite;
-}Maison_alimentee;
 
-typedef  struct Ressource {
-   //ALLEGRO_BITMAPimage_batiment[2];
-   int type;
-   int largeur,hauteur;
-   int caseX, caseY;
-   int capacite_max;
-   int capacite_utilisee;
-   int nb_maison_alimentee;
-   Maison_alimentee* tab_des_maisons_alimentee;
-}Ressource;
-
-typedef struct Plateau {
-   int largeur_case;
-   int nb_ligne;
-   int nb_colonne;
-   int compte_en_banque;
-   int tab_des_prix;
-   Case **map;
-   int nb_stade_different;
-   int tab_nb_habitant_pour_chaque_stade_de_maison;
-   int nb_maison;
-   Maison* tab_de_maison;
-   int nb_chateau_eau;
-   Ressource tab_chateau_eau;
-   int nb_centrale_elec;
-   Ressource tab_centrale_elec;
-} Plateau;
-*/
-void initAllegro(){
+void initAllegro(){ //initialisation d'Allegro
     al_init();
     al_init_primitives_addon();
     al_init_font_addon();
@@ -930,78 +872,7 @@ void initAllegro(){
     al_install_audio();
     al_init_acodec_addon();
 }
-/*
-void fichierTexte() {
-    FILE *ifs = fopen("../fichierTexte", "r");
-    Plateau *plateau;
 
-    int largeur_case, nb_colonne, nb_ligne;
-    int obstacle;
-    int nb_stade, nb_habitant_necesaire;
-    int banque_initial, prix;
-
-
-    if (!ifs) {
-        printf("Erreur de lecture fichier\n");
-        exit(-1);
-    }
-
-
-    plateau->nb_colonne = NOMBRECOLONNE;
-    plateau->nb_ligne = NOMBRELIGNE;
-    plateau->largeur_case = 16;
-
-    for (int i = 0; i < plateau->nb_ligne; i++) {
-        for (int j = 0; j < plateau->nb_colonne; j++) {
-            fscanf(ifs, "%d", &obstacle);
-            plateau->map[i][j].obstacle = obstacle;
-        }
-    }
-
-    fscanf(ifs, "%d", &nb_stade);
-    plateau->nb_stade_different = nb_stade;
-    for (int i = 0; i < plateau->nb_stade_different; i++) {
-        fscanf(ifs, "%d", &nb_habitant_necesaire);
-        //plateau->tab_nb_habitant_pour_chaque_stade_de_maison[i] = nb_habitant_necesaire;
-    }
-    plateau->compte_en_banque = banque_initial;
-    for (int i = 0; i < 4; i++) {
-        fscanf(ifs, "%d", &prix);
-        //plateau->tab_des_prix[i] = prix;
-    }
-
-    plateau->nb_maison = 0;
-    plateau->nb_chateau_eau = 0;
-    plateau->nb_centrale_elec = 0;
-
-    //return plateau;
-}
-
-void liresauv(Case tab[NOMBRELIGNE][NOMBRECOLONNE]) {
-    FILE *ifs = fopen("../fichierTexte", "r");
-    int etat;
-    for (int i = 0; i < NOMBRELIGNE; ++i) {
-        for (int j = 0; j < NOMBRECOLONNE; ++j) {
-            fscanf(ifs, "%d", &etat);
-            tab[i][j].etat = etat;
-        }
-    }
-    fclose(ifs);
-}
-
-void sauvegarde(Case tab[NOMBRELIGNE][NOMBRECOLONNE]) {
-    FILE *ifs = fopen("../fichierTexte", "w");
-    int etat;
-    for (int i = 0; i < NOMBRELIGNE; ++i) {
-        for (int j = 0; j < NOMBRECOLONNE; ++j) {
-            fprintf(ifs, "%d ", &etat);
-            tab[i][j].etat = etat;
-        }
-        fprintf(ifs, "\n");
-    }
-    fclose(ifs);
-}
- */
 int largeurCaseGrille(short x1, short x2){
     return (x2 - x1)/NOMBRECOLONNE;
 }
@@ -1105,6 +976,15 @@ void dessinerCadre(int x1,int y1,int x2,int y2,ALLEGRO_COLOR couleur ){
     al_draw_filled_rectangle(x1, y1, x2, y2,couleur);
     al_draw_rectangle(x1,y1,x2,y2, al_map_rgb(50,50,50), 2);
 }
+
+// initilisation police d'écriture
+
+ALLEGRO_FONT* initialiserPoliceTexte(short taillePolice){
+    ALLEGRO_FONT* policeTexte = NULL ;
+    policeTexte = al_load_ttf_font("../Bangers-Regular.ttf", taillePolice,0);
+    return policeTexte;
+}
+
 ALLEGRO_FONT* initialiserPoliceTexte2(short taillePolice){
     ALLEGRO_FONT* policeTexte = NULL ;
     policeTexte = al_load_ttf_font("../Bangers-Regular.ttf", taillePolice,0);
@@ -1189,7 +1069,7 @@ void dessinerInfosJeu(ALLEGRO_FONT* policeTexteGrande,float xcase, float ycase, 
     al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X1CAPELEC, Y1CAPELEC,0,"cap elec : %d",infoGeneral->capelec);
     al_draw_textf(policeTexteGrande, al_map_rgb(0,0,0), X2GRILLE + 20, Y1GRILLE ,0,"case : [%.0f] [%.0f] ",xcase +1,ycase+1);
 }
-void afficherTempsRestant(float tempsRestant,float mois, ALLEGRO_FONT* policeTexte){
+void afficherTempsRestant(float tempsRestant,float mois, ALLEGRO_FONT* policeTexte){ //chronomètre
     al_draw_textf(policeTexte, al_map_rgb(0,0,0), XCHRONO + 60, YCHRONO - 20,0,"%.1f secondes", tempsRestant);
     al_draw_textf(policeTexte, al_map_rgb(0,0,0), XCHRONO + 60, YCHRONO ,0,"%.0f mois", mois);
     double angle = (tempsRestant)*(-0.42);
@@ -1205,11 +1085,7 @@ void dessinnerTouteCasesColorie() {
         }
     }
 }
-ALLEGRO_FONT* initialiserPoliceTexte(short taillePolice){
-    ALLEGRO_FONT* policeTexte = NULL ;
-    policeTexte = al_load_ttf_font("../Bangers-Regular.ttf", taillePolice,0);
-    return policeTexte;
-}
+
 bool checkSourisDansBouton(short xSouris, short ySouris, short x1, short y1,short x2, short y2 ){
     if(xSouris >= x1 && xSouris <= x2 && ySouris >= y1 && ySouris <= y2){
         return true;
@@ -1236,9 +1112,7 @@ void rechercheCentral(InfoGeneral* infoGeneral, int x, int y, bool*connecteEau, 
     if (!(*connecteEau) || !(*connecteElec)) {
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++) {
-                // recherche de central
                 if (!(i == j || i == -j)) {
-
                     switch (matriceCase[y + i][x + j].obstacle) {
                         case 6 : {
                             matricePlateau[y + i][x + j].obstacle = 22;
@@ -1246,7 +1120,6 @@ void rechercheCentral(InfoGeneral* infoGeneral, int x, int y, bool*connecteEau, 
                             break;
                         }
                         case 7 : {
-                            // on a trouvé une centrale
                             *connecteElec = true;
                             break;
                         }
@@ -1321,11 +1194,9 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
                     al_draw_bitmap(imageMaison, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].etat == 4) {
-                    //matriceCase[j][i].couleurCase = al_map_rgb(100, 200, 0);
                     al_draw_bitmap(imageImmeuble, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].etat == 5) {
-                    //matriceCase[j][i].couleurCase = al_map_rgb(200, 0, 100);
                     al_draw_bitmap(imageGratteCiel, 16*i+20, 16*j+20, 0);
                 }
                 if (matriceCase[j][i].obstacle == 6) {
@@ -1409,27 +1280,23 @@ InfoGeneral* construireterrain(short xSouris, short ySouris, short xcase , short
                         }
                     }
                 }
-                if(caseVide == 9 && infoGeneral->argent >= 1000) {
+                if(caseVide == 9 && infoGeneral->argent >= 1000) { //si les 9 cases sont vides et argent suffisant
                     infoGeneral->argent -= 1000;
                     infoGeneral->nombreMaison =infoGeneral->nombreMaison+1;
                     infoGeneral->nbConstruction =infoGeneral->nbConstruction+1;
                     infoGeneral->maison[infoGeneral->nombreMaison].caseX = xcase;
                     infoGeneral->maison[infoGeneral->nombreMaison].caseY = ycase;
                     verificationViable(infoGeneral,matriceCase, xcase,ycase);
-                    if(verificationViable(infoGeneral,matriceCase, xcase,ycase)){
-                        printf("yo");
-                    }
                     for(short k = 0; k< 3; k++) {
                         for (short l = 0; l < 3; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 1;
-                            matriceCase[ycase][xcase].etat = 1;
+                            matriceCase[ycase][xcase].etat = 1;// pixel en haut à gauche du batiment
                             matriceCase[k+ycase][l+xcase].batiment=1;
                             //matriceCase[k+ycase][l + xcase].numConstruction=infoGeneral->nombreMaison;
                             matriceCase[k+ycase][l + xcase].numConstruction=infoGeneral->nbConstruction;
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
-                    sauvegarde();
                     //infoGeneral= remplissageGraphe(infoGeneral);
                 }
             }
@@ -1451,11 +1318,11 @@ InfoGeneral* construireciterne(short xSouris, short ySouris, short xcase , short
                         }
                     }
                 }
-                if(caseVide == 24 && infoGeneral->argent >= 100000){
+                if(caseVide == 24 && infoGeneral->argent >= 100000){ //si case vides et argent necessaire
                     infoGeneral->argent -=100000;
                     infoGeneral->nombreCiterne =infoGeneral->nombreCiterne +1;
                     infoGeneral->nbConstruction=infoGeneral->nbConstruction+1;
-                    infoGeneral->capeau +=5000;
+                    infoGeneral->capeau +=5000; //capicité en haut incrementée
                     infoGeneral->citerne[infoGeneral->nombreCiterne].caseX = xcase;
                     infoGeneral->citerne[infoGeneral->nombreCiterne].caseY = ycase;
                     for(short k = 0; k< 6; k++)
@@ -1470,7 +1337,6 @@ InfoGeneral* construireciterne(short xSouris, short ySouris, short xcase , short
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
-                    sauvegarde();
                     //infoGeneral= remplissageGraphe(infoGeneral);
                     //infoGeneral=AlimentationEnEau(infoGeneral);
                 }
@@ -1492,7 +1358,7 @@ InfoGeneral* construireusine(short xSouris, short ySouris, short xcase , short y
                         }
                     }
                 }
-                if(caseVide == 24 && infoGeneral->argent >= 100000){
+                if(caseVide == 24 && infoGeneral->argent >= 100000){ // vérification que toutes le scases sont libres et argent suffisant
                     infoGeneral->argent -=100000;
                     infoGeneral->nombreUsine +=1;
                     infoGeneral->nbConstruction++;
@@ -1502,14 +1368,13 @@ InfoGeneral* construireusine(short xSouris, short ySouris, short xcase , short y
                     for(short k = 0; k< 6; k++) {
                         for (short l = 0; l < 4; l++) {
                             matriceCase[k + ycase][l + xcase].obstacle = 8;
-                            matriceCase[ycase][xcase].etat = 8;
+                            matriceCase[ycase][xcase].etat = 8;//pixel en haut à gauche de l'image
                             matriceCase[k+ycase][l+xcase].batiment=8;
                             //matriceCase[k + ycase][l + xcase].numConstruction=infoGeneral->nombreUsine;
                             matriceCase[k + ycase][l + xcase].numConstruction=infoGeneral->nbConstruction;
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
-                    sauvegarde();
                     //infoGeneral= remplissageGraphe(infoGeneral);
                 }
             }
@@ -1568,12 +1433,11 @@ InfoGeneral* destructionConstruction(short xSouris, short ySouris, short xcase ,
             }
         }
     }
-    sauvegarde();
     return infoGeneral;
 }
 
 InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral, short *mode){
-    if(verificationViable(infoGeneral,matriceCase,infoGeneral->maison[infoGeneral->nombreMaison].caseX,infoGeneral->maison[infoGeneral->nombreMaison].caseY) || *mode == 2){
+    if(verificationViable(infoGeneral,matriceCase,infoGeneral->maison[infoGeneral->nombreMaison].caseX,infoGeneral->maison[infoGeneral->nombreMaison].caseY) || *mode == 2){ // si relié à citerne et centrale
         for(short i = 0; i< NOMBRECOLONNE; i++)
         {
             for (short j = 0; j < NOMBRELIGNE; j++) {
@@ -1629,7 +1493,6 @@ InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral, short *mode){
             }
         }
     }
-    sauvegarde();
     return infoGeneral;
 }
 
@@ -1646,7 +1509,7 @@ int main() {
     ALLEGRO_EVENT_QUEUE *temps = NULL;
     ALLEGRO_EVENT event;
     al_reserve_samples(10);
-    ALLEGRO_BITMAP *imageMenu = al_load_bitmap("../etape1.png");
+    ALLEGRO_BITMAP *imageMenu = al_load_bitmap("../etape1.png");// images
     ALLEGRO_BITMAP *imageCabane = al_load_bitmap("../CABANE.png");
     ALLEGRO_BITMAP *imageMaison = al_load_bitmap("../house1.png");
     ALLEGRO_BITMAP *imageTerrain = al_load_bitmap("../grass.png");
@@ -1655,7 +1518,7 @@ int main() {
     ALLEGRO_BITMAP *imageGratteCiel = al_load_bitmap("../Skyscraper.png");
     ALLEGRO_BITMAP *imageCiterne = al_load_bitmap("../watertower.png");
     ALLEGRO_SAMPLE *son = al_load_sample("../The-Sims-Soundtrack_-Buy-Mode-1.ogg");
-    ALLEGRO_SAMPLE_INSTANCE *instanceSon = al_create_sample_instance(son);
+    ALLEGRO_SAMPLE_INSTANCE *instanceSon = al_create_sample_instance(son);//musique
     al_set_sample_instance_playmode(instanceSon,ALLEGRO_PLAYMODE_LOOP);
     al_attach_sample_instance_to_mixer(instanceSon,al_get_default_mixer());
     al_set_audio_stream_gain(instanceSon, 0.5f);
@@ -1707,7 +1570,7 @@ int main() {
     ALLEGRO_FONT *policeTexteTitre = initialiserPoliceTexteTitre(TAILLEPOLICETITRE);
     initDonneesJeu();
     initialiserCasesGrille();
-    bool fin = false;
+    bool end = false;
     al_flip_display();
     do {
         chercherCaseDeLaSourie(sourisState.x, sourisState.y, &souris1.Casex, &souris1.Casey, &souris1.interieurPlateau);
@@ -1717,14 +1580,14 @@ int main() {
         al_get_mouse_state(&sourisState);
 
         switch (event.type) {
-            case ALLEGRO_EVENT_DISPLAY_CLOSE : {
-                fin = true;
+            case ALLEGRO_EVENT_DISPLAY_CLOSE : { //fermeture de la fenêtre si croix en haut à droite
+                end = true;
                 break;
             }
-            case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN : {
+            case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN : { //si on appuis je bouton de la souris
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, BOUTTONX1, BOUTTONY1, BOUTTONX2, BOUTTONY2) &&
                     etape <= 3) {
-                    etape = 0;
+                    etape = 0; //etape 0 : menu      1 : regle      2 : crédits     3 : modes       4 : interface de jeu
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, SCREEN_WIDTH / 10 + 100, SCREEN_HEIGHT - 100,
                                           SCREEN_WIDTH / 3 - 50, SCREEN_HEIGHT - 50) && etape == 0) {
@@ -1841,9 +1704,10 @@ int main() {
                 }
                 if (checkSourisDansBouton(sourisState.x, sourisState.y, X1SAUVEGARDE, Y1SAUVEGARDE,X2SAUVEGARDE, Y2SAUVEGARDE) && pause == 1) {
                     etape = 0;
+                    sauvegarde();
                 }
             }
-            case ALLEGRO_EVENT_KEY_DOWN : {
+            case ALLEGRO_EVENT_KEY_DOWN : { //si on appuie sur une touche du clavier
                 switch (event.keyboard.keycode){
                     case ALLEGRO_KEY_SPACE : {
                         if (pause){
@@ -1979,6 +1843,7 @@ int main() {
                     case ALLEGRO_KEY_S : {
                         if (pause == 1){
                             etape = 0;
+                            sauvegarde();
                         }
                         break;
                     }
@@ -2001,11 +1866,11 @@ int main() {
             al_clear_to_color(al_map_rgb(0, 0, 0));
             dessinerInformationsGenerales(policeTexte2, policeTexteGrande);
         }
-        if (etape == 3) {
+        if (etape == 3) {//interface mode
             al_clear_to_color(al_map_rgb(0, 0, 0));
             dessinerBoutonSelectionMode(policeTexte2, policeTexteGrande);
         }
-        if (etape == 4) {
+        if (etape == 4) {//interface de jeu
             if (event.type == ALLEGRO_EVENT_TIMER) {
                 al_clear_to_color(al_map_rgb(255, 255, 255));
                 //dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0), policeTexte);
@@ -2015,6 +1880,12 @@ int main() {
                 afficherTempsRestant(tempsRestant, mois, policeTexte);
                 dessinerBoutonOutil(policeTexte, policeTexte);
                 dessinerInfosJeu(policeTexte, souris1.Casex,souris1.Casey,infoGeneral);
+                if (boite) {
+                    dessinerBoiteOutil(policeTexte, policeTexte);
+                }
+                if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
+                    al_flip_display();
+                }
                 if (pause){
                     dessinerSauvegarde(policeTexte, policeTexte);
                 }
@@ -2026,17 +1897,12 @@ int main() {
                 } else {
                     tempsRestant += 0.1;
                 }
-                if (boite) {
-                    dessinerBoiteOutil(policeTexte, policeTexte);
-                }
-                if (event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
-                    al_flip_display();
-                }
             }
-            al_flip_display();
         }
         al_flip_display();
-    } while (!fin);
+    } while (!end);
+
+    //destruction
     al_destroy_display(display);
     display = NULL;
     al_destroy_timer(timer);
