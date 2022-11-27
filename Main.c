@@ -1198,9 +1198,9 @@ void rechercheCentral(InfoGeneral* infoGeneral, int x, int y, bool*connecteEau, 
                 // recherche de central
                 if (!(i == j || i == -j)) {
 
-                    switch (matriceCase[y + i][x + j].etat) {
+                    switch (matriceCase[y + i][x + j].obstacle) {
                         case 6 : {
-                            matricePlateau[y + i][x + j].etat = 22;
+                            matricePlateau[y + i][x + j].obstacle = 22;
                             rechercheCentral(infoGeneral, x + j, y + i, connecteEau, connecteElec,matricePlateau);
                             break;
                         }
@@ -1227,7 +1227,7 @@ int verificationViable(InfoGeneral* infoGeneral, Case plateau[NOMBRELIGNE][NOMBR
     for (int i = -1; i < 4; i++) {
         for (int j = -1; j < 4; j++) {
             if (compteur != 0 && compteur != 4 && compteur != 20 && compteur != 24) {
-                if (plateau[i + y][j + x].etat == 6) {
+                if (plateau[i + y][j + x].obstacle == 6) {
                     rechercheCentral(infoGeneral, j + x, i + y, &connecteEau, &connecteElec,matriceCase);
                 }
             }
@@ -1237,8 +1237,8 @@ int verificationViable(InfoGeneral* infoGeneral, Case plateau[NOMBRELIGNE][NOMBR
 
     for (int i = 0; i < NOMBRELIGNE; i++) {
         for (int j = 0; j < NOMBRECOLONNE; j++) {
-            if (plateau[i][j].etat == 22)
-                plateau[i][j].etat = 6;
+            if (plateau[i][j].obstacle == 22)
+                plateau[i][j].obstacle = 6;
         }
     }
     if (connecteElec && connecteEau)
@@ -1300,9 +1300,6 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
                 }
                 if (matriceCase[j][i].obstacle == 9) {
                     matriceCase[j][i].couleurCase = al_map_rgba(200, 100, 40,200);
-                }
-                if (matriceCase[j][i].etat == 22) {
-                    matriceCase[j][i].couleurCase = al_map_rgb(0, 0, 200);
                 }
             }
             if(niveau == 1){
@@ -1490,53 +1487,55 @@ InfoGeneral* destructionConstruction(short xSouris, short ySouris, short xcase ,
     return infoGeneral;
 }
 
-InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral){
-    for(short i = 0; i< NOMBRECOLONNE; i++) {
-        for (short j = 0; j < NOMBRELIGNE; j++) {
-            if(matriceCase[j][i].obstacle == 4 )
-            {
-                matriceCase[j][i].obstacle = 5;
-                if(matriceCase[j][i].etat == 4 )
+InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral, short *mode){
+    if(verificationViable(infoGeneral,matriceCase,infoGeneral->maison[infoGeneral->nombreMaison].caseX,infoGeneral->maison[infoGeneral->nombreMaison].caseY) || *mode == 2){
+        for(short i = 0; i< NOMBRECOLONNE; i++) {
+            for (short j = 0; j < NOMBRELIGNE; j++) {
+                if(matriceCase[j][i].obstacle == 4 )
                 {
-                    matriceCase[j][i].etat = 5;
-                    infoGeneral->habitant+=900;
+                    matriceCase[j][i].obstacle = 5;
+                    if(matriceCase[j][i].etat == 4 )
+                    {
+                        matriceCase[j][i].etat = 5;
+                        infoGeneral->habitant+=900;
+                    }
+                    if(matriceCase[j][i].batiment == 4 )
+                    {
+                        matriceCase[j][i].batiment = 5;
+                    }
                 }
-                if(matriceCase[j][i].batiment == 4 )
-                {
-                    matriceCase[j][i].batiment = 5;
+                if(matriceCase[j][i].obstacle == 3 ){
+                    matriceCase[j][i].obstacle = 4;
+                    if(matriceCase[j][i].etat == 3 ){
+                        matriceCase[j][i].etat = 4;
+                        infoGeneral->habitant+=50;
+                    }
+                    if(matriceCase[j][i].batiment == 3 )
+                    {
+                        matriceCase[j][i].batiment = 4;
+                    }
                 }
-            }
-            if(matriceCase[j][i].obstacle == 3 ){
-                matriceCase[j][i].obstacle = 4;
-                if(matriceCase[j][i].etat == 3 ){
-                    matriceCase[j][i].etat = 4;
-                    infoGeneral->habitant+=50;
+                if(matriceCase[j][i].obstacle == 2 ){
+                    matriceCase[j][i].obstacle = 3;
+                    if(matriceCase[j][i].etat == 2 ){
+                        matriceCase[j][i].etat = 3;
+                        infoGeneral->habitant+=40;
+                    }
+                    if(matriceCase[j][i].batiment == 2 )
+                    {
+                        matriceCase[j][i].batiment = 3;
+                    }
                 }
-                if(matriceCase[j][i].batiment == 3 )
-                {
-                    matriceCase[j][i].batiment = 4;
-                }
-            }
-            if(matriceCase[j][i].obstacle == 2 ){
-                matriceCase[j][i].obstacle = 3;
-                if(matriceCase[j][i].etat == 2 ){
-                    matriceCase[j][i].etat = 3;
-                    infoGeneral->habitant+=40;
-                }
-                if(matriceCase[j][i].batiment == 2 )
-                {
-                    matriceCase[j][i].batiment = 3;
-                }
-            }
-            if(matriceCase[j][i].obstacle == 1 ){
-                matriceCase[j][i].obstacle = 2;
-                if(matriceCase[j][i].etat == 1 ){
-                    matriceCase[j][i].etat = 2;
-                    infoGeneral->habitant+=10;
-                }
-                if(matriceCase[j][i].batiment == 1 )
-                {
-                    matriceCase[j][i].batiment = 2;
+                if(matriceCase[j][i].obstacle == 1 ){
+                    matriceCase[j][i].obstacle = 2;
+                    if(matriceCase[j][i].etat == 1 ){
+                        matriceCase[j][i].etat = 2;
+                        infoGeneral->habitant+=10;
+                    }
+                    if(matriceCase[j][i].batiment == 1 )
+                    {
+                        matriceCase[j][i].batiment = 2;
+                    }
                 }
             }
         }
@@ -1930,7 +1929,7 @@ int main() {
                 else if (tempsRestant >= 15.0) {
                     tempsRestant = 0.0;
                     mois++;
-                    infoGeneral=evolutionTerrain(infoGeneral);
+                    infoGeneral=evolutionTerrain(infoGeneral, &mode);
                     infoGeneral->argent = infoGeneral->argent+ 10 * infoGeneral->habitant;
                 } else {
                     tempsRestant += 0.1;
