@@ -173,7 +173,7 @@ typedef struct Bouton{
 }Bouton;
 
 typedef struct Case{
-    short x1Case, x2Case, y1Case, y2Case, obstacle,etat;
+    int x1Case, x2Case, y1Case, y2Case, obstacle,etat;
     int batiment,numConstruction;
     ALLEGRO_COLOR couleurCase;
 }Case;
@@ -226,6 +226,19 @@ typedef struct InfoGeneral{
     int source;
     Graphe* graphe;
 }InfoGeneral;
+
+typedef struct infosJeu{
+    int prixTerrain;
+    int prixUsine;
+    int prixCiterne;
+    int prixRoute;
+    int nbHabcabane;
+    int nbHabmaison;
+    int nbHabimmeuble;
+    int nbHabgratteciel;
+    int capaciteCiterne;
+    int capaciteUsine;
+}t_infosJeu;
 
 void afficher_successeurs(pSommet * sommet, int num)
 {
@@ -817,7 +830,7 @@ InfoGeneral* remplissageGraphe(InfoGeneral* infoGeneral) {
                         {
                             for (l = 0; l < 4; l++)
                             {
-                                infoGeneral=rechercheRoute(i+k,j+l,tab, infoGeneral);
+                                //infoGeneral=rechercheRoute(i+k,j+l,tab, infoGeneral);
                                 infoGeneral->distance=0;
                             }
                         }
@@ -831,6 +844,25 @@ InfoGeneral* remplissageGraphe(InfoGeneral* infoGeneral) {
     }
     graphe_afficher(infoGeneral);
     return infoGeneral;
+}
+
+t_infosJeu recupererInfosJeu(t_infosJeu infos)
+{
+    FILE *ifs = fopen("infosJeu.txt","r");
+    int i,j;
+    if(ifs==NULL)    {printf("erreur");}
+
+    matriceCase[i][j].couleurCase = al_map_rgba(0,0,0,0);
+    fscanf(ifs,"%d ",&infos.prixTerrain);
+    fscanf(ifs,"%d ",&infos.prixUsine);
+    fscanf(ifs,"%d ",&infos.prixCiterne);
+    fscanf(ifs,"%d ",&infos.prixRoute);
+    fscanf(ifs,"%d ",&infos.nbHabcabane);
+    fscanf(ifs,"%d ",&infos.nbHabmaison);
+    fscanf(ifs,"%d ",&infos.nbHabimmeuble);
+    fscanf(ifs,"%d ",&infos.nbHabgratteciel);
+    fclose(ifs);
+    return infos;
 }
 
 /*
@@ -968,19 +1000,28 @@ float coordonneY1CaseGrille( short y1,  short y2,short noLigne) {
 float coordonneY2CaseGrille( short y1,  short y2,short noLigne) {
     return y1 + hauteurCaseGrille(y1,y2) * (noLigne);
 }
-void initialiserCasesGrille(){
-    for(short i = 0; i<NOMBRELIGNE; i++){
-        for(short j = 0; j < NOMBRECOLONNE; j++){
+void initialiserCasesGrille()
+{
+    FILE *ifs = fopen("matriceDebut.txt","r");
+    int i,j;
+    if(ifs==NULL)    {printf("erreur");}
+
+    for ( i = 0; i < NOMBRELIGNE; i++) //récupérer les données de la matrice
+    {
+        for ( j = 0; j < NOMBRECOLONNE; j++)
+        {
             matriceCase[i][j].x1Case = coordonneX1CaseGrille(X1GRILLE, X2GRILLE, j+1);
             matriceCase[i][j].y1Case = coordonneY1CaseGrille(Y1GRILLE, Y2GRILLE, i+1);
             matriceCase[i][j].x2Case = coordonneX2CaseGrille(X1GRILLE, X2GRILLE, j+1);
             matriceCase[i][j].y2Case = coordonneY2CaseGrille(Y1GRILLE, Y2GRILLE, i+1);
-            matriceCase[i][j].obstacle = 0;
-            matriceCase[i][j].batiment=0;
-            matriceCase[i][j].numConstruction=0;
+            //matriceCase[i][j].batiment=0;
+            //matriceCase[i][j].numConstruction=0;
             matriceCase[i][j].couleurCase = al_map_rgba(0,0,0,0);
+            fscanf(ifs,"%d ",&matriceCase[i][j].obstacle);
+            fscanf(ifs,"%d ",&matriceCase[i][j].etat);
         }
     }
+    fclose(ifs);
 }
 void chercherCaseDeLaSourie(int x, int y, int *caseX, int *caseY, bool *dansPlateau) {
     if ((x >= 20 && x <= 920) && (y >= 20 && y <= 720)) {
@@ -1005,6 +1046,7 @@ void chercherCaseDeLaSourie(int x, int y, int *caseX, int *caseY, bool *dansPlat
         *caseY = 0;
     }
 }
+
 void initDonneesJeu(){
     //initialiserTabBouton();
     initialiserCasesGrille();
@@ -1169,7 +1211,6 @@ void dessinneGrille( int x1, int y1, int x2, int y2, int epaisseur, ALLEGRO_COLO
     }
 }
 
-
 void rechercheCentral(InfoGeneral* infoGeneral, int x, int y, bool*connecteEau, bool*connecteElec,Case matricePlateau[NOMBRELIGNE][NOMBRECOLONNE]) {
     if (!(*connecteEau) || !(*connecteElec)) {
         for (int i = -1; i < 2; i++) {
@@ -1226,7 +1267,6 @@ int verificationViable(InfoGeneral* infoGeneral, Case plateau[NOMBRELIGNE][NOMBR
         return 0;
 }
 
-
 void verificationMaisonNonViables(InfoGeneral * infoGeneral,Case plateau[NOMBRELIGNE][NOMBRECOLONNE],int x, int y) {
     for (int i = 0; i < 50; i++) {
         if (infoGeneral->maison[i].vivable == 0) {
@@ -1234,9 +1274,6 @@ void verificationMaisonNonViables(InfoGeneral * infoGeneral,Case plateau[NOMBREL
         }
     }
 }
-
-
-
 
 void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* policeTexte,ALLEGRO_BITMAP* imageCiterne,ALLEGRO_BITMAP* imageCabane,ALLEGRO_BITMAP* imageMaison,ALLEGRO_BITMAP* imageImmeuble,ALLEGRO_BITMAP* imageGratteCiel, ALLEGRO_BITMAP* imageTerrain,ALLEGRO_BITMAP* imageUsine){
     dessinneGrille(X1GRILLE, Y1GRILLE, X2GRILLE, Y2GRILLE, 1, al_map_rgb(0, 0, 0),policeTexte);
@@ -1295,6 +1332,28 @@ void colorierCaseSouris(short xSouris, short ySouris,short niveau,ALLEGRO_FONT* 
     }
 }
 
+void sauvegarde()
+{
+    FILE *ifs = fopen("SauvegardeObstacle.txt","w");
+    FILE *ifs2 = fopen("SauvegardeEtat.txt","w");
+    int i,j;
+    if(ifs==NULL)    {printf("erreur");}
+    if(ifs2==NULL)    {printf("erreur");}
+
+    for ( i = 0; i < 35; i++) //récupérer les données de la matrice
+    {
+        for ( j = 0; j < 45; j++)
+        {
+            fprintf(ifs,"%d ",matriceCase[i][j].obstacle);
+            fprintf(ifs2,"%d ",matriceCase[i][j].etat);
+        }
+        fprintf(ifs,"\n ");
+        fprintf(ifs2,"\n ");
+    }
+    fclose(ifs);
+    fclose(ifs2);
+}
+
 InfoGeneral* construireroute(short xSouris, short ySouris, short xcase , short ycase,InfoGeneral* infoGeneral){
     for(short i = 0; i< NOMBRECOLONNE; i++){
         for(short j = 0; j<NOMBRELIGNE; j++) {
@@ -1345,6 +1404,7 @@ InfoGeneral* construireterrain(short xSouris, short ySouris, short xcase , short
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
+                    sauvegarde();
                     //infoGeneral= remplissageGraphe(infoGeneral);
                 }
             }
@@ -1385,7 +1445,8 @@ InfoGeneral* construireciterne(short xSouris, short ySouris, short xcase , short
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
-                    infoGeneral= remplissageGraphe(infoGeneral);
+                    sauvegarde();
+                    //infoGeneral= remplissageGraphe(infoGeneral);
                     //infoGeneral=AlimentationEnEau(infoGeneral);
                 }
             }
@@ -1423,7 +1484,8 @@ InfoGeneral* construireusine(short xSouris, short ySouris, short xcase , short y
                         }
                     }
                     matriceCase[ycase][xcase].batiment=11;
-                    infoGeneral= remplissageGraphe(infoGeneral);
+                    sauvegarde();
+                    //infoGeneral= remplissageGraphe(infoGeneral);
                 }
             }
         }
@@ -1463,6 +1525,7 @@ InfoGeneral* destructionConstruction(short xSouris, short ySouris, short xcase ,
             }
         }
     }
+    sauvegarde();
     return infoGeneral;
 }
 
@@ -1518,12 +1581,13 @@ InfoGeneral* evolutionTerrain(InfoGeneral* infoGeneral, short *mode){
                 }
                 if(matriceCase[j][i].batiment == 11)
                 {
-                    infoGeneral= remplissageGraphe(infoGeneral);
-                    infoGeneral=AlimentationEnEau(infoGeneral,infoGeneral->source);
+                    //infoGeneral= remplissageGraphe(infoGeneral);
+                    //infoGeneral=AlimentationEnEau(infoGeneral,infoGeneral->source);
                 }
             }
         }
     }
+    sauvegarde();
     return infoGeneral;
 }
 
@@ -1534,6 +1598,8 @@ void dessinerBoutonOutil(ALLEGRO_FONT* policeTexte,ALLEGRO_FONT* policeTexteGran
 int main() {
 
     initAllegro();
+    t_infosJeu InfosJeu;
+    InfosJeu=recupererInfosJeu(InfosJeu);
     ALLEGRO_EVENT_QUEUE *queue = NULL;
     ALLEGRO_EVENT_QUEUE *temps = NULL;
     ALLEGRO_EVENT event;
