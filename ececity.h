@@ -107,6 +107,52 @@
 #define NB_HABITANT_IMMEUBLE 100
 #define NB_HABITANT_GRATTECIEL 1000
 
+
+typedef struct maillon
+{
+    int numero;
+    struct maillon* suivant;
+}t_maillon;
+
+typedef struct attente
+{
+    t_maillon* tete;
+    t_maillon* fin;
+}t_attente;
+
+// Structure d'un arc//
+struct Arc
+{
+    int sommet; // numero de sommet d'un arc adjacent au sommet initial
+    int poids;      //aussi la capacité maximale de chaque arc
+    struct Arc* arc_suivant;
+};
+
+// Alias de pointeur sur un Arc //
+typedef struct Arc* pArc;
+
+// Structure d'un sommet//
+struct Sommet
+{
+    struct Arc* arc;
+    int capacite;
+    int NbrHabitant;
+    int valeur;
+    int distance;
+    int pred;
+    int couleur;
+};
+
+// Alias de pointeur sur un Sommet //
+typedef struct Sommet* pSommet;
+
+typedef struct graphe
+{
+    int ordre;
+    pSommet* pSommet;
+    t_attente* attente;
+} Graphe;
+
 typedef struct Bouton{ //pour affichage
     short  x1Bouton, y1Bouton, x2Bouton, y2Bouton, taillePolice, action;
     char nomBouton[20];
@@ -158,6 +204,7 @@ typedef struct InfoGeneral{
     int capelec;
     int distance;
     int source;
+    Graphe * graphe;
 }InfoGeneral;
 
 typedef struct infosJeu{
